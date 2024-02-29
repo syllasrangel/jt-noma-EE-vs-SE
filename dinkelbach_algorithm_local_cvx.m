@@ -36,12 +36,8 @@ for l = 0:L_max
             
     cvx_end
     
-    %[~, N, D] = EE_obj_function_global_CVX(w, BW, gamma, rho, P_fix, kappa, lambda, PCM, isJT, a_ib, c_ib, c1_b, zeros(N_inner_users+1, N_BSs), zeros(N_inner_users+1, N_BSs), q);
     [~, N, D] = EE_obj_function_local_cvx(w, BW, h_i, rho, kappa, P_fix, a_i, c_i, ICI_i, zeros(N_users,1), lambda, q);
     
-%     if(status2exitflag(cvx_status) == 0)
-%         teste =1
-%     end
     if(N-lambda*D < 0.00001 || status2exitflag(cvx_status)<0)
         break;
     end

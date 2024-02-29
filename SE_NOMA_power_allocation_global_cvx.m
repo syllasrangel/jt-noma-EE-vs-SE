@@ -1,5 +1,4 @@
-function [P_i, status, l] = dinkelbach_algorithm_cvx(Pt, BW, w, R, R_min_JT_user, gamma, rho, P_fix, kappa, PCM, a_ib, c_ib, c1_b, isJT, SIC_constraint)
-%SIC_constraint = true;
+function [P_i, EXITFLAG, l] = SE_NOMA_power_allocation_global_cvx(Pt, BW, w, R, R_min_JT_user, gamma, isJT, SIC_constraint)
 L_max=30; % Max number of iterations
 
 [N_users, N_BSs, ~] = size(gamma);
@@ -14,21 +13,63 @@ else
 end
 
 
-lambda = 0;
+gamma_ib = NaN(N_users,N_BSs);
+for bs = 1:N_BSs
+    for i = 1:N_users
+        gamma_ib(i,bs) = gamma(i,bs,bs);
+    end
+end
+
+
+% ========== Feasiblity test =============
+[P_i, status] = min_power_global_cvx(Pt, BW, w, R, R_min_JT_user, gamma, isJT, SIC_constraint);
+
+% Initial power allocation
+P_i_old = P_i;
+
 
 length_q = N_BSs*(N_inner_users + isJT) + ~isJT;
 
-
-for l = 0:L_max
-
-    cvx_begin quiet
-        variable q_test(length_q);
-        %variable x(N_BSs) % New variable
-        %variable z(N_BSs) % New variable
+if( status2exitflag(status) < 0)
+    l = 0;
+else
+    for l = 0:L_max
+        
+        if(l~=0)
+            %abs(system_throughput(w, BW, gamma, isJT, P_i_old) - system_throughput(w, BW, gamma, isJT, P_i))
+            if(abs(system_throughput(w, BW, gamma, isJT, P_i_old) - system_throughput(w, BW, gamma, isJT, P_i)) < 0.0001)
+                break;
+            end
+            P_i_old = P_i;
+        end
+        
+        %SINR for non-CoMP case
+        [ICI, INUI] = interference(gamma, isJT, P_i);
+        P_ib = Pvec2mat(gamma, isJT, P_i);
+        
+        SINR_ib = P_ib.*gamma_ib./(ICI + INUI + w);
+    
+        a_ib = SINR_ib./(1+SINR_ib);
+        c_ib = log2(1+SINR_ib) - SINR_ib.*log2(SINR_ib)./(1+SINR_ib);
+        c_ib(isnan(c_ib))=0;
+        
+        c1_b = NaN(N_BSs,1);
+        if(isJT)
+            sum_aux = 0;
+            for bs = 1:N_BSs
+                sum_aux = sum_aux + P_ib(N_users,bs).*gamma_ib(N_users,bs);
+            end
+            for bs = 1:N_BSs
+                c1_b(bs) = P_ib(N_users,bs).*gamma_ib(N_users,bs)./sum_aux;
+            end
+        end
+        
+        cvx_begin quiet
+        variable q_test(length_q)
         expression INUI(N_inner_users+1, N_BSs)
         expression ICI(N_inner_users+1, N_BSs)
         expression INUI_jk(N_inner_users+1, N_BSs, N_inner_users+1)
-        maximize( EE_obj_function_global_CVX(w, BW, gamma, rho, P_fix, kappa, lambda, PCM, isJT, a_ib, c_ib, c1_b, INUI, ICI, q_test) );
+        maximize( SE_obj_function_global_CVX(w, BW, gamma, isJT, a_ib, c_ib, c1_b, INUI, ICI, q_test) );
         subject to
             % ICI and inter-NOMA-user interference (INUI) calculation
             [ICI, INUI, INUI_jk] = interference_CVX(gamma, isJT, 2.^q_test, ICI, INUI, INUI_jk);
@@ -61,29 +102,14 @@ for l = 0:L_max
                 end
                 tot_power - Pt <= 0;
             end
-%             % === New constraints ===
-%             if(isJT)
-%                 x>=0;
-%                 x<=1;
-%                 z>=0;
-%                 z<=Pt*x;
-%                 for bs = 1:N_BSs
-%                     -Pt*(1-x(bs)) <= z(bs) - 2.^q_test(two_dim_2_one_dim(J_b(1), bs, N_users, isJT))
-%                     z(bs) <= 2.^q_test(two_dim_2_one_dim(J_b(1), bs, N_users, isJT))
-%                 end
-%                 CoMP_power = 0;
-%                 for bs = 1:N_BSs
-%                     CoMP_power = CoMP_power + 2.^q_test(two_dim_2_one_dim(J_b(1), bs, N_users, isJT));
-%                 end
-%                 sum(z) = CoMP_power;
-%             end
+            
             
             % === SIC constraint ===
             if(SIC_constraint)
                 for bs = 1:N_BSs
-                    %for j = 1:(J_b(bs)-1)
-                        %for k = j+1:J_b(bs)
-                    for j = 1:(J_b(bs)-1-isJT) % Not testing conditions to decode edge user`s signal in any user (it allows edge user to be served by only one BS)
+%                     for j = 1:(J_b(bs)-1)
+%                         for k = j+1:J_b(bs) 
+                     for j = 1:(J_b(bs)-1-isJT) % Not testing conditions to decode edge user`s signal in any user (it allows edge user to be served by only one BS)
                         for k = j+1:J_b(bs)-isJT % Not testing conditions to decode edge user`s signal in any user (it allows edge user to be served by only one BS)
                             if((isJT && k==J_b(bs)) || (~isJT && k==J_b(bs) && bs==1))
                                 gamma_min = 2^(R_min_JT_user/(w*BW)) - 1;
@@ -98,24 +124,10 @@ for l = 0:L_max
             
     cvx_end
     
+    P_i = 2.^q_test;
     
-    [calc_obj, N, D] = EE_obj_function_global_CVX(w, BW, gamma, rho, P_fix, kappa, lambda, PCM, isJT, a_ib, c_ib, c1_b, zeros(N_inner_users+1, N_BSs), zeros(N_inner_users+1, N_BSs), q_test);
-    %calc_obj
-    %cvx_optval
-    %cvx_optval_gap = cvx_optval - calc_obj;
-    %delta_opt_fraction = delta_opt/cvx_optval
-    
-    if(N-lambda*D < 0.00001)
-        break;
     end
-
-    lambda = N/D;
-    
-    
 end
-
-
-status = cvx_status;
-P_i = 2.^q_test;
+EXITFLAG = status2exitflag(status);
 
 end

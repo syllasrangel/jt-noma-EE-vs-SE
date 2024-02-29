@@ -4,7 +4,6 @@ L_max=30; % Max number of iterations
 N_users = length(h_i);
 
 % Sets the inital power as the minimum required to attend the QoS requirement
-% TODO: check calculations and when to use R_min_JT_user
 P_i_old = zeros(N_users,1);
 for i = 1:N_users
     INUI = 0;

@@ -2,6 +2,10 @@ function plot_scenario(BS_position_1, inner_users_pos_1, edge_users_pos_1, BS_po
 
 figure,
 plot(inner_users_pos_1,'.b','MarkerSize',20),
+% Number the users according to their index
+for ii = 1:length(inner_users_pos_1)
+    text(real(inner_users_pos_1(ii))+0.005,imag(inner_users_pos_1(ii))+0.005, num2str(ii));
+end
 hold on,
 plot(edge_users_pos_1,'.g','MarkerSize',20),
 plot(real(BS_position_1),imag(BS_position_1),'*r'),
@@ -10,6 +14,9 @@ plot_circle(real(BS_position_1),imag(BS_position_1),cell_radius),
 plot_circle(real(BS_position_1),imag(BS_position_1),inner_circle_radius),
 
 plot(inner_users_pos_2,'.b','MarkerSize',20),
+for ii = 1:length(inner_users_pos_2)
+    text(real(inner_users_pos_2(ii))+0.005,imag(inner_users_pos_2(ii))+0.005, num2str(ii));
+end
 plot(edge_users_pos_2,'.y','MarkerSize',20),
 plot(real(BS_position_2),imag(BS_position_2),'*r'),
 text(real(BS_position_2),imag(BS_position_2),'\leftarrow BS 2'),

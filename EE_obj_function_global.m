@@ -2,7 +2,6 @@ function [f, N, D] = EE_obj_function_global(w, BW, gamma, rho, P_fix, kappa, lam
     [N_users, N_BSs, ~] = size(gamma);
     N_inner_users = N_users - 1;    
 
-%     % TODO: Use the convex obj function with a and b (also c_b for JT)
 %     N = system_throughput(w, BW, gamma, isJT, P_i);
 
     % Reshapes the vector q

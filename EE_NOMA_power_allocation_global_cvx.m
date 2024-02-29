@@ -13,7 +13,7 @@ end
 
 
 % ========== Feasiblity test =============
-[P_i, status] = min_power_global_cvx(Pt, BW, w, R, R_min_JT_user, gamma, isJT);
+[P_i, status] = min_power_global_cvx(Pt, BW, w, R, R_min_JT_user, gamma, isJT, SIC_constraint);
 
 % Initial power allocation
 P_i_old = P_i;
@@ -25,7 +25,6 @@ else
     for l = 0:L_max
         
         if(l~=0)
-            %abs(system_throughput(w, BW, gamma, isJT, 2.^q_test)/system_power_consumption(2.^q_test, gamma, rho, P_fix, kappa, PCM, isJT) - system_throughput(w, BW, gamma, isJT, P_i)/system_power_consumption(P_i, gamma, rho, P_fix, kappa, PCM, isJT))
             if(abs(system_throughput(w, BW, gamma, isJT, P_i_old)/system_power_consumption(P_i_old, gamma, rho, P_fix, kappa, isJT, true) - system_throughput(w, BW, gamma, isJT, P_i)/system_power_consumption(P_i, gamma, rho, P_fix, kappa, isJT, true)) < 0.0001)
                 break;
             end

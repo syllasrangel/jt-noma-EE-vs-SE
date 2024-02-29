@@ -28,6 +28,8 @@ function [BS1_position, BS2_position, inner_users_pos_BS1, inner_users_pos_BS2, 
     [inner_users_pos_BS1, edge_users_pos_BS1] = generate_cell(BS1_position, N_inner_users, N_JT_users*5, cell_radius, inner_circle_radius);
     [inner_users_pos_BS2, edge_users_pos_BS2] = generate_cell(BS2_position, N_inner_users, N_JT_users*5, cell_radius, inner_circle_radius);
     
+    %plot_scenario(BS1_position, inner_users_pos_BS1, edge_users_pos_BS1, BS2_position, inner_users_pos_BS2, edge_users_pos_BS2, cell_radius, inner_circle_radius)
+    
     if(any(inner_users_dist) && length(inner_users_dist) == N_inner_users)
         inner_users_pos_BS1 = zeros(N_inner_users,1);
         inner_users_pos_BS2 = zeros(N_inner_users,1);

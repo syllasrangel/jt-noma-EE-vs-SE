@@ -14,7 +14,6 @@ function [ICI, INUI] = interference(gamma, isJT, P_i)
     if(~isJT)% NaN in q(JT_user,: ~1) for conventional NOMA
         insert = @(a, x, n)cat(1,  x(1:n), a, x(n+1:end));
         for bs1 = 2:N_BSs
-            %q = insert(-inf, q, bs1*(N_inner_users + 1) - 1);
             P_i = insert(NaN, P_i, bs1*(N_inner_users + 1) - 1);
         end
     end
@@ -29,7 +28,6 @@ function [ICI, INUI] = interference(gamma, isJT, P_i)
         for k = 1:J_b(bs1)
             for bs2 = 1:N_BSs
                 if(bs1~=bs2)
-                    %for j = 1:(J_b(bs2) - isJT) % When JT it does not consider interference from the cell-edge user
                     for j = 1:(J_b(bs2) - ( isJT && k == J_b(bs2) ) ) % When JT it does not consider interference from the cell-edge user on itself
                         ICI(k,bs1) = ICI(k,bs1) + P_ib(j,bs2).*gamma(k,bs1,bs2);
                     end

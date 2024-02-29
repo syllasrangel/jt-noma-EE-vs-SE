@@ -1,149 +1,113 @@
 function [] = paper_figures()
 
 
-    data_PCM1 = load("workspaces\2022_12_08_18_31_workspace_PCM_M1_kappa_0_00_rho_0_00_100samp.mat");
-    data_PCM2 = load("workspaces\2022_12_09_00_25_workspace_PCM_M2_kappa_0_00_rho_0_00_100samp.mat");
-    %data_kappa_00 = load("workspaces\2022_12_12_15_50_workspace_PCM_proposed_kappa_0_00_rho_0_10_100samp.mat"); % Without local
-    data_kappa_00 = load("workspaces\2022_12_13_21_37_workspace_PCM_proposed_kappa_0_00_rho_0_10_100samp.mat");
-    data_kappa_050 = load('workspaces\2022_12_08_18_32_workspace_PCM_proposed_kappa_0_50_rho_0_10_100samp.mat');
-    data_kappa_250 = load("workspaces\2022_12_11_23_18_workspace_PCM_proposed_kappa_2_50_rho_0_10_100samp.mat");
+    data_EE = load('workspaces\2023_02_09_14_37_workspace_EE_PCM_proposed_kappa_0_50_rho_0_10_100samp.mat');
+    data_SE = load('workspaces\2023_02_13_17_00_workspace_SE_PCM_proposed_kappa_0_50_rho_0_10_100samp.mat');
+    %data_min = load('workspaces\2023_02_13_20_11_workspace_min_PCM_proposed_kappa_0_50_rho_0_10_100samp.mat');
+    data_min = load('workspaces\2023_02_16_11_35_workspace_min_PCM_proposed_kappa_0_50_rho_0_10_100samp.mat');
+    %data_min = load('workspaces/2023_02_14_11_03_workspace_min_PCM_proposed_kappa_0_50_rho_0_10_1000samp.mat');
+    data_min_3_inner_users = load('workspaces/2023_02_14_20_46_workspace_min_PCM_proposed_kappa_0_50_rho_0_10_100samp.mat');
+    data_min_4_inner_users = load('workspaces/2023_02_14_20_55_workspace_min_PCM_proposed_kappa_0_50_rho_0_10_100samp.mat');
+    data_min_5_inner_users = load('workspaces/2023_02_14_21_02_workspace_min_PCM_proposed_kappa_0_50_rho_0_10_100samp.mat');
     
-    x_axis = data_PCM1.x_axis;
-
-
+    % R = 1 Mbps
+    data_EE_half_R = load('workspaces/2023_04_24_22_19_workspace_EE_PCM_proposed_kappa_0_50_rho_0_10_100samp.mat');
+    data_EE_double_R = load('workspaces/2023_04_24_21_37_workspace_EE_PCM_proposed_kappa_0_50_rho_0_10_100samp.mat');
+    data_EE_double_R_stop_per_BS = load('workspaces/2023_04_25_16_02_workspace_EE_PCM_proposed_kappa_0_50_rho_0_10_100samp.mat');
+    data_EE_half_R_stop_per_BS = load('workspaces/2023_04_25_23_13_workspace_EE_PCM_proposed_kappa_0_50_rho_0_10_100samp.mat');
+    x_axis = data_EE.x_axis;
+    
+    
     aux_kappa = 0.5;
     aux_rho = 0.1;
     aux_P_fix = 1;
-    [R_JT_PCM1, R_NOMA_PCM1, R_LOCAL_PCM1, Pi_sys_JT_PCM1, Pi_sys_NOMA_PCM1, Pi_sys_LOCALl_PCM1, feasible_JT_PCM1, feasible_NOMA_PCM1, feasible_LOCAL_PCM1] = prepare_data_box(data_PCM1, aux_kappa, aux_rho, aux_P_fix);
-    [R_JT_PCM2, R_NOMA_PCM2, R_LOCAL_PCM2, Pi_sys_JT_PCM2, Pi_sys_NOMA_PCM2, Pi_sys_LOCAL_PCM2, feasible_JT_PCM2, feasible_NOMA_PCM2, feasible_LOCAL_PCM2] = prepare_data_box(data_PCM2, aux_kappa, aux_rho, aux_P_fix);
-    [R_JT_050, R_NOMA_050, R_LOCAL_050, Pi_sys_JT_050, Pi_sys_NOMA_050, Pi_sys_LOCAL_050, feasible_JT_050, feasible_NOMA_050, feasible_LOCAL_050] = prepare_data_box(data_kappa_050, aux_kappa, aux_rho, aux_P_fix);
-    %[R_JT_250, R_NOMA_250, R_LOCAL_250, Pi_sys_JT_250, Pi_sys_NOMA_250, Pi_sys_local_250, feasible_JT_250, feasible_NOMA_250, feasible_LOCAL_250] = prepare_data_box(data_kappa_250, aux_kappa, aux_rho, aux_P_fix);
+    [R_JT_EE, R_NOMA_EE, ~, Pi_sys_JT_EE, Pi_sys_NOMA_EE, ~, feasible_JT_EE, feasible_NOMA_EE, ~] = prepare_data_box(data_EE, aux_kappa, aux_rho, aux_P_fix);
+    [R_JT_SE, R_NOMA_SE, ~, Pi_sys_JT_SE, Pi_sys_NOMA_SE, ~, feasible_JT_SE, feasible_NOMA_SE, ~] = prepare_data_box(data_SE, aux_kappa, aux_rho, aux_P_fix);
+    [R_JT_min, R_NOMA_min, ~, Pi_sys_JT_min, Pi_sys_NOMA_min, ~, feasible_JT_min, feasible_NOMA_min, ~] = prepare_data_box(data_min, aux_kappa, aux_rho, aux_P_fix);
     
-    feasible = feasible_JT_PCM1 & feasible_JT_PCM2 & feasible_JT_050; %& feasible_JT_250;
-      
+    
+    non_error_samples = ~data_EE.error_samples.' & ~data_SE.error_samples.' & ~data_min.error_samples.';
+    feasible_all = feasible_JT_EE & feasible_NOMA_EE & feasible_JT_SE & feasible_NOMA_SE & feasible_JT_min & feasible_NOMA_min & non_error_samples;
+    
+    
     % -------------------------------
-    % EE opt. PCM 1 eval all PCMs
+    % Iterations
     % -------------------------------
-    [~, ~, ~, Pi_sys_JT_eval_PCM1, ~, ~, ~, ~, ~] = prepare_data_box(data_PCM1, 0, 0, 0);
-    [~, ~, ~, Pi_sys_JT_eval_PCM2, ~, ~, ~, ~, ~] = prepare_data_box(data_PCM1, 0, 0, aux_P_fix);
-    [~, ~, ~, Pi_sys_JT_eval_PCMprop, ~, ~, ~, ~, ~] = prepare_data_box(data_PCM1, aux_kappa, aux_rho, aux_P_fix);
-    [EE_EE_t_S1_global_PCM_prop, EE_EE_t_CI_S1_global_PCM_prop] = mean_confidence_interval(R_JT_PCM1(:,feasible_JT_PCM1)./Pi_sys_JT_eval_PCMprop(:,feasible_JT_PCM1));
-    [EE_EE_t_S1_global_PCM2, EE_EE_t_CI_S1_global_PCM2] = mean_confidence_interval(R_JT_PCM1(:,feasible_JT_PCM1)./Pi_sys_JT_eval_PCM2(:,feasible_JT_PCM1));
-    [EE_EE_t_S1_global_PCM1, EE_EE_t_CI_S1_global_PCM1] = mean_confidence_interval(R_JT_PCM1(:,feasible_JT_PCM1)./Pi_sys_JT_eval_PCM1(:,feasible_JT_PCM1));
+    [R_JT_EE_half_R, R_NOMA_EE_half_R, ~, Pi_sys_JT_EE_half_R, Pi_sys_NOMA_EE_half_R, ~, feasible_JT_EE_half_R, feasible_NOMA_EE_half_R, feasible_LOCAL_EE_half_R] = prepare_data_box(data_EE_half_R, aux_kappa, aux_rho, aux_P_fix);
+    [R_JT_EE_double_R, R_NOMA_EE_double_R, ~, Pi_sys_JT_EE_double_R, Pi_sys_NOMA_EE_double_R, ~, feasible_JT_EE_double_R, feasible_NOMA_EE_double_R, feasible_LOCAL_EE_double_R] = prepare_data_box(data_EE_double_R, aux_kappa, aux_rho, aux_P_fix);
+    [R_JT_EE_double_R_stop_per_BS, R_NOMA_EE_double_R_stop_per_BS, ~, Pi_sys_JT_EE_double_R_stop_per_BS, Pi_sys_NOMA_EE_double_R_stop_per_BS, ~, feasible_JT_EE_double_R_stop_per_BS, feasible_NOMA_EE_double_R_stop_per_BS, feasible_LOCAL_EE_double_R_stop_per_BS] = prepare_data_box(data_EE_double_R_stop_per_BS, aux_kappa, aux_rho, aux_P_fix);
+    [R_JT_EE_half_R_stop_per_BS, R_NOMA_EE_half_R_stop_per_BS, ~, Pi_sys_JT_EE_half_R_stop_per_BS, Pi_sys_NOMA_EE_half_R_stop_per_BS, ~, feasible_JT_EE_half_R_stop_per_BS, feasible_NOMA_EE_half_R_stop_per_BS, feasible_LOCAL_EE_half_R_stop_per_BS] = prepare_data_box(data_EE_half_R_stop_per_BS, aux_kappa, aux_rho, aux_P_fix);
     
-    y_EE_opt_1_eval_050 = R_JT_PCM1(:,feasible_JT_PCM1)./Pi_sys_JT_eval_PCMprop(:,feasible_JT_PCM1);
-    y_EE_opt_1_eval_2 = R_JT_PCM1(:,feasible_JT_PCM1)./Pi_sys_JT_eval_PCM2(:,feasible_JT_PCM1);
-    y_EE_opt_1_eval_1 = R_JT_PCM1(:,feasible_JT_PCM1)./Pi_sys_JT_eval_PCM1(:,feasible_JT_PCM1);
+%     figure, plot(x_axis,mean(data_EE_half_R.N_iter_local(:,feasible_LOCAL_EE_half_R),2),'-+b','LineWidth',1),
+%     hold on 
+%     plot(x_axis,mean(data_EE_double_R.N_iter_local(:,feasible_LOCAL_EE_double_R),2),'-*k','LineWidth',1),
+%     hold on 
+%     plot(x_axis,mean(data_EE_double_R_stop_per_BS.N_iter_local(:,feasible_LOCAL_EE_double_R_stop_per_BS),2),'-*k','LineWidth',1),
+%     legend('R/2', '2R','2R stop per BS')
+%     xlabel('Minimum data rate requirement (Kbps)');
+%     ylabel('Number of iterations');
+    non_error_samples_local = ~data_EE_half_R.error_samples.' & ~data_EE_double_R.error_samples.' & ~data_EE_double_R_stop_per_BS.error_samples.' & ~data_EE_half_R_stop_per_BS.error_samples.';
+    feasible_LOCAL_all = feasible_LOCAL_EE_half_R & feasible_LOCAL_EE_double_R & feasible_LOCAL_EE_double_R_stop_per_BS & feasible_LOCAL_EE_half_R_stop_per_BS & non_error_samples_local;
+    N_iter_half = data_EE_half_R.N_iter_local(1,feasible_LOCAL_all);
+    N_iter_double = data_EE_double_R.N_iter_local(1,feasible_LOCAL_all);
+    N_iter_double_stop_per_BS = data_EE_double_R_stop_per_BS.N_iter_local(1,feasible_LOCAL_all);
+    N_iter_half_stop_per_BS = data_EE_half_R_stop_per_BS.N_iter_local(1,feasible_LOCAL_all);
     
-    save('workspaces/figures_data.mat','x_axis','y_EE_opt_1_eval_050','y_EE_opt_1_eval_2','y_EE_opt_1_eval_1');
+    figure
+    boxplot([N_iter_half.',N_iter_double.', N_iter_double_stop_per_BS.', N_iter_half_stop_per_BS.'],'Labels',{'Half','Double', 'Double stop per BS', 'Half stop per BS'})
+    %save('workspaces/figures_data.mat','Ri_EE','Ri_SE','Ri_min','-append');
     
-    figure;
-    hAx=axes;
-    errorbar(x_axis,EE_EE_t_S1_global_PCM1, EE_EE_t_CI_S1_global_PCM1(:,2),'-+b','LineWidth',1)
+
+    ss = 2;
+    P_BS1_iter = data_EE_double_R.P_BS1_iter(1,1:50,ss);
+    P_BS2_iter = data_EE_double_R.P_BS2_iter(1,1:50,ss);
+    EE_total_iter = data_EE_double_R.EE_total_iter(1,1:50,ss);
+    
+    idxs = find(P_BS1_iter);
+    figure, plot(1:length(idxs),P_BS1_iter(idxs),'-+b','LineWidth',1),
     hold on,
-    errorbar(x_axis,EE_EE_t_S1_global_PCM2, EE_EE_t_CI_S1_global_PCM2(:,2),'-.ok','LineWidth',1)
-    hold on,
-    errorbar(x_axis,EE_EE_t_S1_global_PCM_prop, EE_EE_t_CI_S1_global_PCM_prop(:,2),'-.og','LineWidth',1)
-    hold on,
-    legend('Eval. PCM 1', 'Eval. PCM 2', 'Eval. PCM Proposed');
-    xlabel('Minimum data rate requirement (Kbps)');
-    ylabel('Average energy efficiency (b/s/Joule)');
-    xticks(x_axis);
-    title(sprintf('EE JT-CoMP-NOMA - Optimized with PCM-1 (rho = %0.2f, kappa = %0.2f, P_{fix} = %0.2f)', aux_rho, aux_kappa, aux_P_fix));
-    hAx.YScale='log';
+    plot(1:length(idxs),P_BS2_iter(idxs),'-ok','LineWidth',1),
+    legend('BS 1', 'BS 2')
+    xlabel('Number of iterations');
+    ylabel('Total Power');
+
+    figure, plot(1:length(idxs),EE_total_iter(idxs),'-+b','LineWidth',1),
+%     hold on,
+%     plot(1:length(idxs),ones(1,length(idxs)).*data_EE_double_R.R_tot_EE_S1_global_1(1,ss)./data_EE_double_R.PC_EE_S1_global(1,ss),'-ok','LineWidth',1),
+%      hold on,
+%     plot(1:length(idxs),ones(1,length(idxs)).*data_EE_double_R.R_tot_EE_local(1,ss)./data_EE_double_R.PC_EE_local(1,ss),'-*c','LineWidth',1),
+    xlabel('Number of iterations');
+    ylabel('EE');
+
     
-    sprintf('EE PCM-1/PCMprop for %d Kbps = %0.2f',x_axis(1), EE_EE_t_S1_global_PCM1(1)/EE_EE_t_S1_global_PCM_prop(1))
-    sprintf('EE PCM-1/PCMprop for %d Kbps = %0.2f',x_axis(5), EE_EE_t_S1_global_PCM1(5)/EE_EE_t_S1_global_PCM_prop(5))
-    sprintf('EE PCM-1/PCM-2 for %d Kbps = %0.2f',x_axis(1), EE_EE_t_S1_global_PCM1(1)/EE_EE_t_S1_global_PCM2(1))
-    sprintf('EE PCM-1/PCM-2 for %d Kbps = %0.2f',x_axis(5), EE_EE_t_S1_global_PCM1(5)/EE_EE_t_S1_global_PCM2(5))   
+    figure
+    boxplot([N_iter_double_stop_per_BS.', N_iter_half_stop_per_BS.'],'Labels',{'Half','Double'})
+    
     % -------------------------------
-    % TP opt. all
+    % Is SIC satisfied? 
     % -------------------------------
-    [TP_EE_t_JT_PCM1, TP_EE_t_CI_JT_PCM1] = mean_confidence_interval(R_JT_PCM1(:,feasible));
-    [TP_EE_t_JT_PCM2, TP_EE_t_CI_JT_PCM2] = mean_confidence_interval(R_JT_PCM2(:,feasible));
-    [TP_EE_t_JT_prop, TP_EE_t_CI_JT_prop] = mean_confidence_interval(R_JT_050(:,feasible));
-    %[EE_EE_t_JT_prop_250, EE_EE_t_CI_JT_prop_250] = mean_confidence_interval(R_JT_250(:,feasible));
-    
-    y_TP_opt_050_eval_050 = R_JT_050(:,feasible);
-    y_TP_opt_2_eval_050 = R_JT_PCM2(:,feasible);
-    y_TP_opt_1_eval_050 = R_JT_PCM1(:,feasible);
-    
-    
-    minTP = (data_PCM1.N_BSs*data_PCM1.N_inner_users + data_PCM1.N_JT_users)*data_PCM1.R;
-    
-    save('workspaces/figures_data.mat','y_TP_opt_050_eval_050','y_TP_opt_2_eval_050','y_TP_opt_1_eval_050','minTP','-append');
-    
-    
-    figure,
-    hAx=axes;
-    errorbar(x_axis,TP_EE_t_JT_PCM1, TP_EE_t_CI_JT_PCM1(:,2),'-+b','LineWidth',1),
-    hold on,
-    errorbar(x_axis,TP_EE_t_JT_PCM2, TP_EE_t_CI_JT_PCM2(:,2),'-.ok','LineWidth',1),
-    hold on,
-    errorbar(x_axis,TP_EE_t_JT_prop, TP_EE_t_CI_JT_prop(:,2),'-.og','LineWidth',1),
-    hold on,
-    plot(x_axis, minTP,'-r','LineWidth',1)
-    legend('Opt. PCM 1','Opt. PCM 2','Opt. PCM prop. \kappa = 0.50','Location', 'southeast');
-    xlabel('Minimum data rate requirement (Kbps)');
-    ylabel('Average throughput (b/s)');
-    xticks(x_axis);
-    title(sprintf('JT - Evaluated with PCM prop (rho = %0.2f, kappa = %0.2f, P_{fix} = %0.2f)', aux_rho, aux_kappa, aux_P_fix));
-    hAx.YScale='log';
-    
-    aloc_power_JT_PCM1 = squeeze(sum(data_PCM1.Pi_EE_S1_global,2));
-    aloc_power_JT_PCM2 = squeeze(sum(data_PCM2.Pi_EE_S1_global,2));    
-    aloc_power_JT_PCMprop = squeeze(sum(data_kappa_050.Pi_EE_S1_global,2));
-            
-    [avg_aloc_power_JT_PCM1, ~] = mean_confidence_interval(aloc_power_JT_PCM1(:, feasible_JT_PCM1));
-    [avg_aloc_power_JT_PCM2, ~] = mean_confidence_interval(aloc_power_JT_PCM2(:, feasible_JT_PCM2));
-    [avg_aloc_power_JT_PCMprop, ~] = mean_confidence_interval(aloc_power_JT_PCMprop(:, feasible_JT_050));
-    
-    sprintf('TP PCMprop/PCM-1 for %d Kbps = %0.2f',x_axis(1), TP_EE_t_JT_prop(1)/TP_EE_t_JT_PCM1(1))
-    sprintf('TP PCMprop/PCM-1 for %d Kbps = %0.2f',x_axis(7), TP_EE_t_JT_prop(7)/TP_EE_t_JT_PCM1(7))
-    
-    sprintf('Avg. aloc power PCM-1 for %d Kbps = %0.2f (%0.2f%%)',x_axis(1), avg_aloc_power_JT_PCM1(1), 100*avg_aloc_power_JT_PCM1(1)/(data_PCM1.N_BSs*data_PCM1.Pt))
-    sprintf('Avg. aloc power PCMprop for %d Kbps = %0.2f (%0.2f%%)',x_axis(1), avg_aloc_power_JT_PCMprop(1), 100*avg_aloc_power_JT_PCMprop(1)/(data_PCM1.N_BSs*data_PCM1.Pt))
-    sprintf('Avg. aloc power PCM-1 for %d Kbps = %0.2f (%0.2f%%)',x_axis(7), avg_aloc_power_JT_PCM1(7), 100*avg_aloc_power_JT_PCM1(7)/(data_PCM1.N_BSs*data_PCM1.Pt))
-    sprintf('Avg. aloc power PCMprop for %d Kbps = %0.2f (%0.2f%%)',x_axis(7), avg_aloc_power_JT_PCMprop(7), 100*avg_aloc_power_JT_PCMprop(7)/(data_PCM1.N_BSs*data_PCM1.Pt))
-    
-     % -------------------------------
-    % EE opt. all eval PCM prop
-    % -------------------------------
-    [EE_EE_t_JT_PCM1, EE_EE_t_CI_JT_PCM1] = mean_confidence_interval(R_JT_PCM1(:,feasible)./Pi_sys_JT_PCM1(:,feasible));
-    [EE_EE_t_JT_PCM2, EE_EE_t_CI_JT_PCM2] = mean_confidence_interval(R_JT_PCM2(:,feasible)./Pi_sys_JT_PCM2(:,feasible));
-    [EE_EE_t_JT_prop, EE_EE_t_CI_JT_prop] = mean_confidence_interval(R_JT_050(:,feasible)./Pi_sys_JT_050(:,feasible));
-    %[EE_EE_t_JT_prop_250, EE_EE_t_CI_JT_prop_250] = mean_confidence_interval(R_JT_250(:,feasible)./Pi_sys_JT_250(:,feasible));
-    
-    y_EE_opt_050_eval_050 = R_JT_050(:,feasible)./Pi_sys_JT_050(:,feasible);
-    y_EE_opt_2_eval_050 = R_JT_PCM2(:,feasible)./Pi_sys_JT_PCM2(:,feasible);
-    y_EE_opt_1_eval_050 = R_JT_PCM1(:,feasible)./Pi_sys_JT_PCM1(:,feasible);
-    
-    save('workspaces/figures_data.mat','y_EE_opt_050_eval_050','y_EE_opt_2_eval_050','y_EE_opt_1_eval_050','-append');
-    
-    figure,
-    hAx=axes;
-    errorbar(x_axis,EE_EE_t_JT_PCM1, EE_EE_t_CI_JT_PCM1(:,2),'-+b','LineWidth',1),
-    hold on,
-    errorbar(x_axis,EE_EE_t_JT_PCM2, EE_EE_t_CI_JT_PCM2(:,2),'-.ok','LineWidth',1),
-    hold on,
-    errorbar(x_axis,EE_EE_t_JT_prop, EE_EE_t_CI_JT_prop(:,2),'-.og','LineWidth',1),
-    hold on,
-    legend('Opt. PCM 1','Opt. PCM 2','Opt. PCM prop. \kappa = 0.50');
-    xlabel('Minimum data rate requirement (Kbps)');
-    ylabel('Average energy efficiency (b/s/Joule)');
-    xticks(x_axis);
-    title(sprintf('JT - Evaluated with PCM prop (rho = %0.2f, kappa = %0.2f, P_{fix} = %0.2f)', aux_rho, aux_kappa, aux_P_fix));
-    %hAx.YScale='log';
-    
-    sprintf('EE PCMprop/PCM-1 for %d Kbps = %0.2f',x_axis(1), EE_EE_t_JT_prop(1)/EE_EE_t_JT_PCM1(1))
-    sprintf('EE PCMprop/PCM-1 for %d Kbps = %0.2f',x_axis(7), EE_EE_t_JT_prop(7)/EE_EE_t_JT_PCM1(7))
-    sprintf('EE PCMprop/PCM-2 for %d Kbps = %0.2f',x_axis(1), EE_EE_t_JT_prop(1)/EE_EE_t_JT_PCM2(1))
-    sprintf('EE PCMprop/PCM-2 for %d Kbps = %0.2f',x_axis(7), EE_EE_t_JT_prop(7)/EE_EE_t_JT_PCM2(7))
-    
+%     data_sel = data_min;
+%     ss = 0;
+%     for s = find(feasible_all)
+%         ss = ss + 1;
+%         for x_axis_idx = 1:length(x_axis)
+%             isJT = true;
+%             if(isJT)
+%                 Pi = data_sel.Pi_EE_S1_global(x_axis_idx,:,s);
+%             else
+%                 Pi = data_sel.Pi_EE_S3_global(x_axis_idx,:,s);
+%             end
+%             SIC_ok(x_axis_idx, ss) = is_SIC_satisfied(Pi, data_sel.BW, data_sel.w, data_sel.R_min, data_sel.R_min_JT_user, data_sel.gamma, isJT);
+%             
+%             if(~SIC_ok)
+%                 it_went_wrong = 1;
+%             end
+%         end
+%     end
     % -------------------------------
     % Outage all scenarios 
     % -------------------------------
-    dt = data_PCM2; % PCM does not matter (same outage)
+    dt = data_min; % obj func does not matter (same outage)
     if(dt.s~=dt.N_samples)
         interval = 1:dt.s-1;
     else
@@ -152,291 +116,339 @@ function [] = paper_figures()
     simu_samps = zeros(1,dt.N_samples);
     simu_samps(interval) = 1;
     
+    % Ignores samples with error in the optimization process
+    simu_samps = simu_samps & ~dt.error_samples.';
+    
     outage_JT = dt.Exit_EE_S1_global(:,simu_samps & sum(isnan(dt.Exit_EE_S1_global),1)==0) < 0;
     outage_NOMA = dt.Exit_EE_S3_global(:,simu_samps & sum(isnan(dt.Exit_EE_S3_global),1)==0) < 0;
-    outage_LOCAL = dt.Exit_EE_local(:,simu_samps & sum(isnan(dt.Exit_EE_local),1)==0) < 0;
-    save('workspaces/figures_data.mat','outage_JT','outage_NOMA','outage_LOCAL','-append');
+    save('workspaces/figures_data.mat','x_axis','outage_JT','outage_NOMA');
     
     figure, 
     plot(x_axis,mean(outage_NOMA,2),'-.ok','LineWidth',1),
     hold on,
     plot(x_axis,mean(outage_JT,2),'-+b','LineWidth',1),
     hold on,
-    plot(x_axis,mean(outage_LOCAL,2),'--og','LineWidth',1)    
     xlabel('Minimum data rate requirement (Kbps)');
     ylabel('Outage ratio');
     xticks(x_axis);
-    legend('Conventional NOMA', 'JT-CoMP NOMA', 'Local DPS-CoMP NOMA','Location', 'northwest')
+    legend('NOMA', 'JTCN', 'Location', 'northwest')
     
     
     % -------------------------------
-    % Boxplot EE opt. and eval with PCM prop
+    % TP vs min data rate
     % -------------------------------
-    rates = [1,4,7];
-    feasible_all = feasible_JT_050 & feasible_NOMA_050 & feasible_LOCAL_050;
-    EE_JT_050 = (R_JT_050(:,feasible_all)./Pi_sys_JT_050(:,feasible_all));
-    EE_NOMA_050 = (R_NOMA_050(:,feasible_all)./Pi_sys_NOMA_050(:,feasible_all));
-    EE_LOCAL_050 = (R_LOCAL_050(:,feasible_all)./Pi_sys_LOCAL_050(:,feasible_all));
+    rates = 1:length(x_axis);
+    R_JT_EE_aux = R_JT_EE(rates,feasible_all);
+    R_NOMA_EE_aux = R_NOMA_EE(rates,feasible_all);
+    R_JT_SE_aux = R_JT_SE(rates,feasible_all);
+    R_NOMA_SE_aux = R_NOMA_SE(rates,feasible_all);
+    R_JT_min_aux = R_JT_min(rates,feasible_all);
+    R_NOMA_min_aux = R_NOMA_min(rates,feasible_all);
+    [R_EE_t_S1_global, R_EE_t_CI_S1_global] = mean_confidence_interval(R_JT_EE_aux);
+    [R_EE_t_S3_global, R_EE_t_CI_S3_global] = mean_confidence_interval(R_NOMA_EE_aux);
+    [R_SE_t_S1_global, R_SE_t_CI_S1_global] = mean_confidence_interval(R_JT_SE_aux);
+    [R_SE_t_S3_global, R_SE_t_CI_S3_global] = mean_confidence_interval(R_NOMA_SE_aux);
+    [R_min_t_S1_global, R_min_t_CI_S1_global] = mean_confidence_interval(R_JT_min_aux);
+    [R_min_t_S3_global, R_min_t_CI_S3_global] = mean_confidence_interval(R_NOMA_min_aux);
     
-    save('workspaces/figures_data.mat','EE_JT_050','EE_NOMA_050','EE_LOCAL_050','-append');
+    save('workspaces/figures_data.mat','R_JT_EE_aux','R_JT_SE_aux','R_JT_min_aux','R_NOMA_EE_aux','R_NOMA_SE_aux','R_NOMA_min_aux','-append');
     
-    box_data = {EE_JT_050(rates,:).', EE_NOMA_050(rates,:).', EE_LOCAL_050(rates,:).'};
-    figure,boxplotGroup(box_data, 'PrimaryLabels', {'JTCN' 'Conv.', 'ILO'}, ...
-      'SecondaryLabels',cellstr(string(x_axis(rates))), 'InterGroupSpace', 1, ...
-       'GroupType','withinGroups')
-    title('Energy Efficiency');
-    ylabel('Average energy efficiency (b/s/Joule)')
+    figure;
+    hAx=axes;
+    errorbar(x_axis,R_EE_t_S1_global, R_EE_t_CI_S1_global(:,2),'-+b','LineWidth',1)
+    hold on,
+    errorbar(x_axis,R_EE_t_S3_global,R_EE_t_CI_S3_global(:,2),'-.ok','LineWidth',1),
+    hold on,
+    errorbar(x_axis,R_SE_t_S1_global, R_SE_t_CI_S1_global(:,2),'-+c','LineWidth',1)
+    hold on,
+    errorbar(x_axis,R_SE_t_S3_global,R_SE_t_CI_S3_global(:,2),'-.og','LineWidth',1),
+    hold on,
+    errorbar(x_axis,R_min_t_S1_global, R_min_t_CI_S1_global(:,2),'-+m','LineWidth',1)
+    hold on,
+    errorbar(x_axis,R_min_t_S3_global,R_min_t_CI_S3_global(:,2),'-.oy','LineWidth',1),
+    hold on,
+    legend('EE JTCN','EE NOMA','SE JTCN','SE NOMA', 'min JTCN','min NOMA');
+    xlabel('Minimum data rate requirement (Kbps)');
+    ylabel('Network throughput (b/s)');
+    %title(sprintf('Throughput - %s',PCM_text));
+    hAx.YScale='log';
     
-    
-    sprintf('EE JTCN/NOMA for %d Kbps = %0.5f',x_axis(1), mean(R_JT_050(1,feasible_all)./Pi_sys_JT_050(1,feasible_all))./mean(R_NOMA_050(1,feasible_all)./Pi_sys_NOMA_050(1,feasible_all)))
-    sprintf('EE JTCN/NOMA for %d Kbps = %0.2f',x_axis(4), mean(R_JT_050(4,feasible_all)./Pi_sys_JT_050(4,feasible_all))./mean(R_NOMA_050(4,feasible_all)./Pi_sys_NOMA_050(4,feasible_all)))
-    sprintf('EE JTCN/NOMA for %d Kbps = %0.2f',x_axis(7), mean(R_JT_050(7,feasible_all)./Pi_sys_JT_050(7,feasible_all))./mean(R_NOMA_050(7,feasible_all)./Pi_sys_NOMA_050(7,feasible_all)))
-    sprintf('EE JTCN/ILO for %d Kbps = %0.5f',x_axis(1), mean(R_JT_050(1,feasible_all)./Pi_sys_JT_050(1,feasible_all))./mean(R_LOCAL_050(1,feasible_all)./Pi_sys_LOCAL_050(1,feasible_all)))
-    sprintf('EE JTCN/ILO for %d Kbps = %0.2f',x_axis(4), mean(R_JT_050(4,feasible_all)./Pi_sys_JT_050(4,feasible_all))./mean(R_LOCAL_050(4,feasible_all)./Pi_sys_LOCAL_050(4,feasible_all)))
-    sprintf('EE JTCN/ILO for %d Kbps = %0.2f',x_axis(7), mean(R_JT_050(7,feasible_all)./Pi_sys_JT_050(7,feasible_all))./mean(R_LOCAL_050(7,feasible_all)./Pi_sys_LOCAL_050(7,feasible_all)))
     % -------------------------------
-    % Boxplot TP opt. with PCM prop
+    % EE vs min data rate
     % -------------------------------
-    rates = [1,4,7];
-    R_JT_050 = R_JT_050(:,feasible_all);
-    R_NOMA_050 = R_NOMA_050(:,feasible_all);
-    R_LOCAL_050 = R_LOCAL_050(:,feasible_all);
-    save('workspaces/figures_data.mat','R_JT_050','R_NOMA_050','R_LOCAL_050','-append');
+    Pi_sys_JT_EE_aux = Pi_sys_JT_EE(rates,feasible_all);
+    Pi_sys_NOMA_EE_aux = Pi_sys_NOMA_EE(rates,feasible_all);
+    Pi_sys_JT_SE_aux = Pi_sys_JT_SE(rates,feasible_all);
+    Pi_sys_NOMA_SE_aux = Pi_sys_NOMA_SE(rates,feasible_all);
+    Pi_sys_JT_min_aux = Pi_sys_JT_min(rates,feasible_all);
+    Pi_sys_NOMA_min_aux = Pi_sys_NOMA_min(rates,feasible_all);
+    [EE_EE_t_S1_global, EE_EE_t_CI_S1_global] = mean_confidence_interval(R_JT_EE_aux./Pi_sys_JT_EE_aux);
+    [EE_EE_t_S3_global, EE_EE_t_CI_S3_global] = mean_confidence_interval(R_NOMA_EE_aux./Pi_sys_NOMA_EE_aux);
+    [EE_SE_t_S1_global, EE_SE_t_CI_S1_global] = mean_confidence_interval(R_JT_SE_aux./Pi_sys_JT_SE_aux);
+    [EE_SE_t_S3_global, EE_SE_t_CI_S3_global] = mean_confidence_interval(R_NOMA_SE_aux./Pi_sys_NOMA_SE_aux);
+    [EE_min_t_S1_global, EE_min_t_CI_S1_global] = mean_confidence_interval(R_JT_min_aux./Pi_sys_JT_min_aux);
+    [EE_min_t_S3_global, EE_min_t_CI_S3_global] = mean_confidence_interval(R_NOMA_min_aux./Pi_sys_NOMA_min_aux);
     
-    box_data = {(R_JT_050(rates,:)).', (R_NOMA_050(rates,:)).', (R_LOCAL_050(rates,:)).'};
-    figure,boxplotGroup(box_data, 'PrimaryLabels', {'JT' 'Conv.', 'ILO'}, ...
-      'SecondaryLabels',cellstr(string(x_axis(rates))), 'InterGroupSpace', 1, ...
+    save('workspaces/figures_data.mat','Pi_sys_JT_EE_aux','Pi_sys_JT_SE_aux','Pi_sys_JT_min_aux','Pi_sys_NOMA_EE_aux','Pi_sys_NOMA_SE_aux','Pi_sys_NOMA_min_aux','-append');
+    
+    figure;
+    hAx=axes;
+    errorbar(x_axis,EE_EE_t_S1_global, EE_EE_t_CI_S1_global(:,2),'-+b','LineWidth',1)
+    hold on,
+    errorbar(x_axis,EE_EE_t_S3_global,EE_EE_t_CI_S3_global(:,2),'-.ok','LineWidth',1),
+    hold on,
+    errorbar(x_axis,EE_SE_t_S1_global, EE_SE_t_CI_S1_global(:,2),'-+c','LineWidth',1)
+    hold on,
+    errorbar(x_axis,EE_SE_t_S3_global,EE_SE_t_CI_S3_global(:,2),'-.og','LineWidth',1),
+    hold on,
+    errorbar(x_axis,EE_min_t_S1_global, EE_min_t_CI_S1_global(:,2),'-+m','LineWidth',1)
+    hold on,
+    errorbar(x_axis,EE_min_t_S3_global,EE_min_t_CI_S3_global(:,2),'-.oy','LineWidth',1),
+    hold on,
+    legend('EE JTCN','EE NOMA','SE JTCN','SE NOMA', 'min JTCN','min NOMA');
+    xlabel('Minimum data rate requirement (Kbps)');
+    ylabel('Network energy efficiency (b/s/Joule)');
+    %title(sprintf('Throughput - %s',PCM_text));
+    hAx.YScale='log';
+    
+    % -------------------------------
+    % System power consumption
+    % -------------------------------
+    [EC_EE_t_S1_global, EC_EE_t_CI_S1_global] = mean_confidence_interval(Pi_sys_JT_EE_aux);
+    [EC_EE_t_S3_global, EC_EE_t_CI_S3_global] = mean_confidence_interval(Pi_sys_NOMA_EE_aux);
+    [EC_SE_t_S1_global, EC_SE_t_CI_S1_global] = mean_confidence_interval(Pi_sys_JT_SE_aux);
+    [EC_SE_t_S3_global, EC_SE_t_CI_S3_global] = mean_confidence_interval(Pi_sys_NOMA_SE_aux);
+    [EC_min_t_S1_global, EC_min_t_CI_S1_global] = mean_confidence_interval(Pi_sys_JT_min_aux);
+    [EC_min_t_S3_global, EC_min_t_CI_S3_global] = mean_confidence_interval(Pi_sys_NOMA_min_aux);
+    
+    figure;
+    hAx=axes;
+    errorbar(x_axis,EC_EE_t_S1_global, EC_EE_t_CI_S1_global(:,2),'-+b','LineWidth',1)
+    hold on,
+    errorbar(x_axis,EC_EE_t_S3_global,EC_EE_t_CI_S3_global(:,2),'-.ok','LineWidth',1),
+    hold on,
+    errorbar(x_axis,EC_SE_t_S1_global, EC_SE_t_CI_S1_global(:,2),'-+c','LineWidth',1)
+    hold on,
+    errorbar(x_axis,EC_SE_t_S3_global,EC_SE_t_CI_S3_global(:,2),'-.og','LineWidth',1),
+    hold on,
+    errorbar(x_axis,EC_min_t_S1_global, EC_min_t_CI_S1_global(:,2),'-+m','LineWidth',1)
+    hold on,
+    errorbar(x_axis,EC_min_t_S3_global,EC_min_t_CI_S3_global(:,2),'-.oy','LineWidth',1),
+    hold on,
+    legend('EE JTCN','EE NOMA','SE JTCN','SE NOMA', 'min JTCN','min NOMA');
+    xlabel('Minimum data rate requirement (Kbps)');
+    ylabel('Average system power consumption');
+    %title(sprintf('Throughput - %s',PCM_text));
+    %hAx.YScale='log';
+    
+    % -------------------------------
+    % Boxplot TP
+    % -------------------------------
+    rate = 4;
+    R_JT_EE_aux = R_JT_EE(rate,feasible_all);
+    R_NOMA_EE_aux = R_NOMA_EE(rate,feasible_all);
+    R_JT_SE_aux = R_JT_SE(rate,feasible_all);
+    R_NOMA_SE_aux = R_NOMA_SE(rate,feasible_all);
+    R_JT_min_aux = R_JT_min(rate,feasible_all);
+    R_NOMA_min_aux = R_NOMA_min(rate,feasible_all);
+    %save('workspaces/figures_data.mat','R_JT_050','R_NOMA_050','R_LOCAL_050','-append');
+    
+    %box_data = {(R_JT_050(rates,:)).', (R_NOMA_050(rates,:)).', (R_LOCAL_050(rates,:)).'};
+    
+    box_data = {[R_JT_EE_aux; R_JT_SE_aux; R_JT_min_aux].', [R_NOMA_EE_aux; R_NOMA_SE_aux; R_NOMA_min_aux].'};
+    figure,
+    boxplotGroup(box_data, 'PrimaryLabels', {'JTCN' 'NOMA'}, ...
+      'SecondaryLabels',cellstr(["EE", "SE", "min"]), 'InterGroupSpace', 1, ...
        'GroupType','withinGroups')
     %title('Throughput');
-    ylabel('Average throughput (b/s)')
-
+    ylabel('Network throughput (b/s)')
     
     % -------------------------------
-    % Boxplot EE var. kappa
+    % Boxplot EE
     % -------------------------------
-    [R_JT_00, R_NOMA_00, R_LOCAL_00, Pi_sys_JT_00, Pi_sys_NOMA_00, Pi_sys_local_00, feasible_JT_00, feasible_NOMA_00, feasible_LOCAL_00] = prepare_data_box(data_kappa_00);
-    [R_JT_050, R_NOMA_050, R_LOCAL_050, Pi_sys_JT_050, Pi_sys_NOMA_050, Pi_sys_local_050, feasible_JT_050, feasible_NOMA_050, feasible_LOCAL_050] = prepare_data_box(data_kappa_050);
-    [R_JT_250, R_NOMA_250, R_LOCAL_250, Pi_sys_JT_250, Pi_sys_NOMA_250, Pi_sys_local_250, feasible_JT_250, feasible_NOMA_250, feasible_LOCAL_250] = prepare_data_box(data_kappa_250);
+    rate = 4;
+    EE_JT_EE_aux = R_JT_EE(rate,feasible_all)./Pi_sys_JT_EE(rate,feasible_all);
+    EE_NOMA_EE_aux = R_NOMA_EE(rate,feasible_all)./Pi_sys_NOMA_EE(rate,feasible_all);
+    EE_JT_SE_aux = R_JT_SE(rate,feasible_all)./Pi_sys_JT_SE(rate,feasible_all);
+    EE_NOMA_SE_aux = R_NOMA_SE(rate,feasible_all)./Pi_sys_NOMA_SE(rate,feasible_all);
+    EE_JT_min_aux = R_JT_min(rate,feasible_all)./Pi_sys_JT_min(rate,feasible_all);
+    EE_NOMA_min_aux = R_NOMA_min(rate,feasible_all)./Pi_sys_NOMA_min(rate,feasible_all);
+    %save('workspaces/figures_data.mat','R_JT_050','R_NOMA_050','R_LOCAL_050','-append');
     
-    R_idx = 4;
-    feasible = feasible_JT_00 & feasible_JT_050 & feasible_JT_250 & feasible_NOMA_00 & feasible_NOMA_050 & feasible_NOMA_250;
-    JT_00 = (R_JT_00(R_idx,feasible)./Pi_sys_JT_00(R_idx,feasible)).';
-    JT_050 = (R_JT_050(R_idx,feasible)./Pi_sys_JT_050(R_idx,feasible)).';
-    JT_250 = (R_JT_250(R_idx,feasible)./Pi_sys_JT_250(R_idx,feasible)).';
-    NOMA_00 = (R_NOMA_00(R_idx,feasible)./Pi_sys_NOMA_00(R_idx,feasible)).';
-    NOMA_050 = (R_NOMA_050(R_idx,feasible)./Pi_sys_NOMA_050(R_idx,feasible)).';
-    NOMA_250 = (R_NOMA_250(R_idx,feasible)./Pi_sys_NOMA_250(R_idx,feasible)).';
-    
-    EE_JT_diff_kappa = [JT_00, JT_050, JT_250].';
-    EE_NOMA_diff_kappa = [NOMA_00, NOMA_050, NOMA_250].';
-    save('workspaces/figures_data.mat','EE_JT_diff_kappa','EE_NOMA_diff_kappa','-append');
-    
-    box_data = {[JT_00, JT_050, JT_250], [NOMA_00, NOMA_050, NOMA_250]};
-    figure,boxplotGroup(box_data, 'PrimaryLabels', {'JT' 'Conv.'}, ...
-      'SecondaryLabels',cellstr(["\kappa = 0","\kappa = 0.5","\kappa = 2.5"]), 'InterGroupSpace', 1, ...
+    box_data = {[EE_JT_EE_aux; EE_JT_SE_aux; EE_JT_min_aux].', [EE_NOMA_EE_aux; EE_NOMA_SE_aux; EE_NOMA_min_aux].'};
+    figure,
+    boxplotGroup(box_data, 'PrimaryLabels', {'JTCN' 'NOMA'}, ...
+      'SecondaryLabels',cellstr(["EE", "SE", "min"]), 'InterGroupSpace', 1, ...
        'GroupType','withinGroups')
-    %title('Energy Efficiency');
-    ylabel('Average energy efficiency (b/s/Joule)')
+    %title('Throughput');
+    ylabel('Network energy efficiency (b/s/Joule)')
+    
+    
+    % -------------------------------
+    % EE vs SE - gain in EE and loss in TP
+    % -------------------------------    
+    EE_EE = R_JT_EE(:,feasible_all)./Pi_sys_JT_EE(:,feasible_all);
+    EE_SE = R_JT_SE(:,feasible_all)./Pi_sys_JT_SE(:,feasible_all);
+    EE_gain = EE_EE./EE_SE;
+    %TP_loss = R_JT_SE(:,feasible_all)./R_JT_EE(:,feasible_all);
+    TP_gain = R_JT_EE(:,feasible_all)./R_JT_SE(:,feasible_all);
+    %EC_decrease = Pi_sys_JT_SE(:,feasible_all)./Pi_sys_JT_EE(:,feasible_all);
+    EC_increase = Pi_sys_JT_EE(:,feasible_all)./Pi_sys_JT_SE(:,feasible_all);
+    
+    [EE_gain_t, EE_gain_CI] = mean_confidence_interval(EE_gain);
+    [TP_gain_t, TP_gain_CI] = mean_confidence_interval(TP_gain);
+    [EC_increase_t, EC_increase_CI] = mean_confidence_interval(EC_increase);
+    
+    lin2dB = @(x)10*log10(x);
+    
+    figure;
+    hAx=axes;
+    errorbar(x_axis,lin2dB(EE_gain_t), EE_gain_CI(:,2),'-+g','LineWidth',1)
+    hold on,
+    errorbar(x_axis,lin2dB(TP_gain_t), TP_gain_CI(:,2),'-.or','LineWidth',1),
+    hold on,
+    errorbar(x_axis,lin2dB(EC_increase_t), EC_increase_CI(:,2),'-.ob','LineWidth',1),
+    hold on,
+    xticks(x_axis);
+    legend('EE gain','TP gain','Power increase');
+    xlabel('Minimum data rate requirement (Kbps)');
+    %hAx.YScale='log';
+    
+    EE_gain_EE_over_SE = lin2dB(EE_gain_t);
+    TP_gain_EE_over_SE = lin2dB(TP_gain_t);
+    EC_gain_EE_over_SE = lin2dB(EC_increase_t);
+    
+    save('workspaces/figures_data.mat','EE_gain_EE_over_SE','TP_gain_EE_over_SE','EC_gain_EE_over_SE','-append');
+    
+    % -------------------------------
+    % EE vs minP - gain in EE and loss in TP
+    % -------------------------------  
 
-    sprintf('EE JTCN/NOMA for %d Kbps and kappa 0 = %0.2f',x_axis(R_idx), mean(JT_00)./mean(NOMA_00))
-    sprintf('EE JTCN/NOMA for %d Kbps and kappa 0.5 = %0.2f',x_axis(R_idx), mean(JT_050)./mean(NOMA_050))
-    sprintf('EE JTCN/NOMA for %d Kbps and kappa 2.5 = %0.2f',x_axis(R_idx), mean(JT_250)./mean(NOMA_250))
+    EE_EE = R_JT_EE(:,feasible_all)./Pi_sys_JT_EE(:,feasible_all);
+    %EE_SE = R_JT_SE(:,feasible_all)./Pi_sys_JT_SE(:,feasible_all);
+    EE_min = R_JT_min(:,feasible_all)./Pi_sys_JT_min(:,feasible_all);
+    EE_gain = EE_EE./EE_min;
+    TP_gain = R_JT_EE(:,feasible_all)./R_JT_min(:,feasible_all);
+    EC_increase = Pi_sys_JT_EE(:,feasible_all)./Pi_sys_JT_min(:,feasible_all);
+    %TP_loss = R_JT_SE(:,feasible_all)./R_JT_EE(:,feasible_all);
+    %EC_decrease = Pi_sys_JT_SE(:,feasible_all)./Pi_sys_JT_EE(:,feasible_all);
     
-    aloc_power_JT_00 = squeeze(sum(data_kappa_00.Pi_EE_S1_global,2));
-    aloc_power_JT_050 = squeeze(sum(data_kappa_050.Pi_EE_S1_global,2));    
-    aloc_power_JT_250 = squeeze(sum(data_kappa_250.Pi_EE_S1_global,2));
-     
-    fea = feasible_JT_00 && feasible_NOMA_00;
-    [avg_aloc_power_JT_00, ~] = mean_confidence_interval(aloc_power_JT_00(:, feasible_NOMA_00));
-    [avg_aloc_power_JT_050, ~] = mean_confidence_interval(aloc_power_JT_050(:, feasible_NOMA_050));
-    [avg_aloc_power_JT_250, ~] = mean_confidence_interval(aloc_power_JT_250(:, feasible_NOMA_250));
+    [EE_gain_t, EE_gain_CI] = mean_confidence_interval(EE_gain);
+    [TP_gain_t, TP_gain_CI] = mean_confidence_interval(TP_gain);
+    [EC_increase_t, EC_increase_CI] = mean_confidence_interval(EC_increase);
     
-    [avg_Pi_sys_JT_00, ~] = mean_confidence_interval(Pi_sys_JT_00(:, feasible_NOMA_00));
-    [avg_Pi_sys_JT_050, ~] = mean_confidence_interval(Pi_sys_JT_050(:, feasible_NOMA_050));
-    [avg_Pi_sys_JT_250, ~] = mean_confidence_interval(Pi_sys_JT_250(:, feasible_NOMA_250));
+    figure;
+    hAx=axes;
+%     errorbar(x_axis,lin2dB(EE_gain_t), EE_gain_CI(:,2),'-+g','LineWidth',1)
+%     hold on,
+%     errorbar(x_axis,lin2dB(TP_gain_t), TP_gain_CI(:,2),'-.or','LineWidth',1),
+%     hold on,
+%     errorbar(x_axis,lin2dB(EC_increase_t), EC_increase_CI(:,2),'-.ob','LineWidth',1),
+%     hold on,
+    plot(x_axis,lin2dB(EE_gain_t),'-+g','LineWidth',1)
+    hold on,
+    plot(x_axis,lin2dB(TP_gain_t),'-.or','LineWidth',1),
+    hold on,
+    plot(x_axis,lin2dB(EC_increase_t),'-.ob','LineWidth',1),
+    hold on,
+    xticks(x_axis);
+    legend('EE gain','TP gain','Power increase');
+    xlabel('Minimum data rate requirement (Kbps)');
+    %hAx.YScale='log';
     
-    user_PC_JT_00 = 0.1*avg_aloc_power_JT_00;
-    SIC_PC_00 =  0;
-    PC_circuit = 2*1;
+    EE_gain_EE_over_min = lin2dB(EE_gain_t);
+    TP_gain_EE_over_min = lin2dB(TP_gain_t);
+    EC_gain_EE_over_min = lin2dB(EC_increase_t);
     
-    avg_aloc_power_JT_00 + user_PC_JT_00 + SIC_PC_00 + PC_circuit
+    save('workspaces/figures_data.mat','EE_gain_EE_over_min','TP_gain_EE_over_min','EC_gain_EE_over_min','-append');
     
-    avg_Pi_sys_JT_00
+    % -------------------------------
+    % SumRate vs minP - gain in EE and loss in TP
+    % -------------------------------  
+
+    %EE_EE = R_JT_EE(:,feasible_all)./Pi_sys_JT_EE(:,feasible_all);
+    EE_SE = R_JT_SE(:,feasible_all)./Pi_sys_JT_SE(:,feasible_all);
+    EE_min = R_JT_min(:,feasible_all)./Pi_sys_JT_min(:,feasible_all);
+    EE_gain = EE_SE./EE_min;
+    TP_gain = R_JT_SE(:,feasible_all)./R_JT_min(:,feasible_all);
+    EC_increase = Pi_sys_JT_SE(:,feasible_all)./Pi_sys_JT_min(:,feasible_all);
+    %TP_loss = R_JT_SE(:,feasible_all)./R_JT_EE(:,feasible_all);
+    %EC_decrease = Pi_sys_JT_SE(:,feasible_all)./Pi_sys_JT_EE(:,feasible_all);
     
-    user_PC_JT_050 = 0.1*avg_aloc_power_JT_050;
-    SIC_PC_050 =  0.5*9;
-    PC_circuit = 2*1;
+    [EE_gain_t, EE_gain_CI] = mean_confidence_interval(EE_gain);
+    [TP_gain_t, TP_gain_CI] = mean_confidence_interval(TP_gain);
+    [EC_increase_t, EC_increase_CI] = mean_confidence_interval(EC_increase);
     
-    avg_aloc_power_JT_050 + user_PC_JT_050 + SIC_PC_050 + PC_circuit
+    figure;
+    hAx=axes;
+    plot(x_axis,lin2dB(EE_gain_t),'-+g','LineWidth',1)
+    hold on,
+    plot(x_axis,lin2dB(TP_gain_t),'-.or','LineWidth',1),
+    hold on,
+    plot(x_axis,lin2dB(EC_increase_t),'-.ob','LineWidth',1),
+    hold on,
+    xticks(x_axis);
+    legend('EE gain','TP gain','Power increase');
+    xlabel('Minimum data rate requirement (Kbps)');
+    %hAx.YScale='log';
     
-    user_PC_JT_250 = 0.1*avg_aloc_power_JT_250;
-    SIC_PC_250 =  2.5*9;
-    PC_circuit = 2*1;
+    EE_gain_SE_over_min = lin2dB(EE_gain_t);
+    TP_gain_SE_over_min = lin2dB(TP_gain_t);
+    EC_gain_SE_over_min = lin2dB(EC_increase_t);
     
-    avg_aloc_power_JT_250 + user_PC_JT_250 + SIC_PC_250 + PC_circuit
+    save('workspaces/figures_data.mat','EE_gain_SE_over_min','TP_gain_SE_over_min','EC_gain_SE_over_min','-append');
     
+    % -------------------------------
+    % Fairness
+    % -------------------------------   
+    R_ib_EE=data_EE.R_EE_S1_global;
+    R_ib_SE=data_SE.R_EE_S1_global;
+    R_ib_min=data_min.R_EE_S1_global;
+    R_ib_EE(isnan(R_ib_EE)) = 0;
+    R_ib_SE(isnan(R_ib_SE)) = 0;
+    R_ib_min(isnan(R_ib_min)) = 0;
+    N_users = data_EE.N_inner_users*data_EE.N_BSs + 1;
+    jains_index_EE = (squeeze(sum(sum(R_ib_EE,2),3)).^2)./(N_users * squeeze(sum(sum(R_ib_EE.^2,2),3)));
+    jains_index_SE = (squeeze(sum(sum(R_ib_SE,2),3)).^2)./(N_users * squeeze(sum(sum(R_ib_SE.^2,2),3)));
+    jains_index_min = (squeeze(sum(sum(R_ib_min,2),3)).^2)./(N_users * squeeze(sum(sum(R_ib_min.^2,2),3)));
     
+    jains_index_EE=jains_index_EE(:,feasible_all);
+    jains_index_SE=jains_index_SE(:,feasible_all);
+    jains_index_min=jains_index_min(:,feasible_all);
+    save('workspaces/figures_data.mat','jains_index_EE','jains_index_SE','jains_index_min','-append');
+    
+    [jains_index_EE_t, jains_index_EE_t_CI] = mean_confidence_interval(jains_index_EE);
+    [jains_index_SE_t, jains_index_SE_t_CI] = mean_confidence_interval(jains_index_SE);
+    [jains_index_min_t, jains_index_min_t_CI] = mean_confidence_interval(jains_index_min);    
+    
+    figure;
+    hAx=axes;
+    errorbar(x_axis,jains_index_EE_t, jains_index_EE_t_CI(:,2),'-+b','LineWidth',1)
+    hold on,
+    errorbar(x_axis,jains_index_SE_t,jains_index_SE_t_CI(:,2),'-.ok','LineWidth',1),
+    hold on,
+    errorbar(x_axis,jains_index_min_t, jains_index_min_t_CI(:,2),'-+c','LineWidth',1)
+    hold on,
+    legend('EE','TP','minP');
+    xlabel('Minimum data rate requirement (Kbps)');
+    ylabel("Average jain's fairness index");
     
     % -------------------------------
     % Users data rate - Boxplot
     % -------------------------------
-    R_EE_S1_global = data_kappa_050.R_EE_S1_global;
-    R_EE_S3_global = data_kappa_050.R_EE_S3_global;
-    R_EE_S1_global(isnan(R_EE_S1_global)) = 0;
-    R_EE_S3_global(isnan(R_EE_S3_global)) = 0;
-
     R_idx = 4;
-    feasible = feasible_JT_050 & feasible_NOMA_050;
-    Ri_JT = R_EE_S1_global(R_idx,:,1, feasible);
-    Ri_NOMA = R_EE_S3_global(R_idx,:,1, feasible);
-    %Ri_JT = [squeeze(Ri_JT).', squeeze(R_EE_S1_global(R_idx,1:data_kappa_050.N_inner_users,2, feasible)).'];
-    %Ri_NOMA = [squeeze(Ri_NOMA).', squeeze(R_EE_S3_global(R_idx,1:data_kappa_050.N_inner_users,2, feasible)).'];
-    Ri_JT = [squeeze(Ri_JT); squeeze(R_EE_S1_global(R_idx,1:data_kappa_050.N_inner_users,2, feasible))];
-    Ri_NOMA = [squeeze(Ri_NOMA); squeeze(R_EE_S3_global(R_idx,1:data_kappa_050.N_inner_users,2, feasible))];
+    Ri_EE = [squeeze(R_ib_EE(R_idx,:,1, feasible_all)); squeeze(R_ib_EE(R_idx,1:data_EE.N_inner_users,2, feasible_all))];
+    Ri_SE = [squeeze(R_ib_SE(R_idx,:,1, feasible_all)); squeeze(R_ib_SE(R_idx,1:data_SE.N_inner_users,2, feasible_all))];
+    Ri_min = [squeeze(R_ib_min(R_idx,:,1, feasible_all)); squeeze(R_ib_min(R_idx,1:data_min.N_inner_users,2, feasible_all))];
+
+    save('workspaces/figures_data.mat','Ri_EE','Ri_SE','Ri_min','-append');
     
-    save('workspaces/figures_data.mat','Ri_JT','Ri_NOMA','-append');
-    
-    box_data = {Ri_JT.', Ri_NOMA.'};
-    figure,boxplotGroup(box_data, 'PrimaryLabels', {'JT' 'Conv.'}, ...
+    box_data = {Ri_EE.', Ri_SE.', Ri_min.'};
+    figure,boxplotGroup(box_data, 'PrimaryLabels', {'EE' 'TP', 'min'}, ...
       'SecondaryLabels',cellstr(["User 1","User 2", "edge user", "User 1 (BS2)","User 2 (BS2)"]), 'InterGroupSpace', 1, ...
        'GroupType','withinGroups')
     ylabel('User data rate (b/s)')
-
-    % -------------------------------
-    % Users EE
-    % -------------------------------
-    %TODO: set the same yaxis limit for all figs
-    data = data_kappa_050;
-    N_users = data.N_inner_users+data.N_JT_users;
     
-    feasible = feasible_JT_00 & feasible_NOMA_00 & feasible_JT_050 & feasible_NOMA_050 & feasible_JT_250 & feasible_NOMA_250;
     
-    tot_user_power_i_bs_JT_00 = zeros(length(x_axis),N_users,data_kappa_00.N_BSs,data_kappa_00.N_samples);
-    tot_user_power_i_bs_NOMA_00 = zeros(length(x_axis),N_users,data_kappa_00.N_BSs,data_kappa_00.N_samples);
-    tot_user_power_i_bs_JT_050 = zeros(length(x_axis),N_users,data_kappa_050.N_BSs,data_kappa_050.N_samples);
-    tot_user_power_i_bs_NOMA_050 = zeros(length(x_axis),N_users,data_kappa_050.N_BSs,data_kappa_050.N_samples);
-    tot_user_power_i_bs_JT_250 = zeros(length(x_axis),N_users,data_kappa_250.N_BSs,data_kappa_250.N_samples);
-    tot_user_power_i_bs_NOMA_250 = zeros(length(x_axis),N_users,data_kappa_250.N_BSs,data_kappa_250.N_samples);
-%     tot_user_power_i_bs_S1 = zeros(length(x_axis),N_users,data.N_BSs,data.N_samples);
-%     tot_user_power_i_bs_S3 = zeros(length(x_axis),N_users,data.N_BSs,data.N_samples);
-    for samp = 1:data.N_samples
-        for x_idx = 1:length(x_axis)
-            for bs=1:data.N_BSs
-%                 Pib_EE_S1_global = Pvec2mat(data.gamma, true, data.Pi_EE_S1_global(x_idx,:,samp));
-%                 Pib_EE_S3_global = Pvec2mat(data.gamma, false, data.Pi_EE_S3_global(x_idx,:,samp));
-%                 [~, tot_user_power_i_bs_S1(x_idx,:,bs,samp)] = user_power_consumption_2(Pib_EE_S1_global(:,bs), data.gamma, data.rho, data.kappa, false);
-%                 [~, tot_user_power_i_bs_S3(x_idx,:,bs,samp)] = user_power_consumption_2(Pib_EE_S3_global(:,bs), data.gamma, data.rho, data.kappa, false);
-                
-                Pib_JT_00 = Pvec2mat(data_kappa_00.gamma, true, data_kappa_00.Pi_EE_S1_global(x_idx,:,samp));
-                Pib_NOMA_00 = Pvec2mat(data_kappa_00.gamma, false, data_kappa_00.Pi_EE_S3_global(x_idx,:,samp));
-                [~, tot_user_power_i_bs_JT_00(x_idx,:,bs,samp)] = user_power_consumption_2(Pib_JT_00(:,bs), data_kappa_00.gamma, data_kappa_00.rho, data_kappa_00.kappa, false);
-                [~, tot_user_power_i_bs_NOMA_00(x_idx,:,bs,samp)] = user_power_consumption_2(Pib_NOMA_00(:,bs), data_kappa_00.gamma, data_kappa_00.rho, data_kappa_00.kappa, false);
-                
-                Pib_JT_050 = Pvec2mat(data_kappa_050.gamma, true, data_kappa_050.Pi_EE_S1_global(x_idx,:,samp));
-                Pib_NOMA_050 = Pvec2mat(data_kappa_050.gamma, false, data_kappa_050.Pi_EE_S3_global(x_idx,:,samp));
-                [~, tot_user_power_i_bs_JT_050(x_idx,:,bs,samp)] = user_power_consumption_2(Pib_JT_050(:,bs), data_kappa_050.gamma, data_kappa_050.rho, data_kappa_050.kappa, false);
-                [~, tot_user_power_i_bs_NOMA_050(x_idx,:,bs,samp)] = user_power_consumption_2(Pib_NOMA_050(:,bs), data_kappa_050.gamma, data_kappa_050.rho, data_kappa_050.kappa, false);
-                
-                Pib_JT_250 = Pvec2mat(data_kappa_250.gamma, true, data_kappa_250.Pi_EE_S1_global(x_idx,:,samp));
-                Pib_NOMA_250 = Pvec2mat(data_kappa_250.gamma, false, data_kappa_250.Pi_EE_S3_global(x_idx,:,samp));
-                [~, tot_user_power_i_bs_JT_250(x_idx,:,bs,samp)] = user_power_consumption_2(Pib_JT_250(:,bs), data_kappa_250.gamma, data_kappa_250.rho, data_kappa_250.kappa, false);
-                [~, tot_user_power_i_bs_NOMA_250(x_idx,:,bs,samp)] = user_power_consumption_2(Pib_NOMA_250(:,bs), data_kappa_250.gamma, data_kappa_250.rho, data_kappa_250.kappa, false);
-            end
-        end
-    end
     
-    R_JT_00 = data_kappa_00.R_EE_S1_global;
-    R_NOMA_00 = data_kappa_00.R_EE_S3_global;
-    R_JT_050 = data_kappa_050.R_EE_S1_global;
-    R_NOMA_050 = data_kappa_050.R_EE_S3_global;
-    R_JT_250 = data_kappa_250.R_EE_S1_global;
-    R_NOMA_250 = data_kappa_250.R_EE_S3_global;
-    R_JT_00(isnan(R_JT_00)) = 0;
-    R_NOMA_00(isnan(R_NOMA_00)) = 0;
-    R_JT_050(isnan(R_JT_050)) = 0;
-    R_NOMA_050(isnan(R_NOMA_050)) = 0;
-    R_JT_250(isnan(R_JT_250)) = 0;
-    R_NOMA_250(isnan(R_NOMA_250)) = 0;
-    % For each cell-center user
-    EEi_JT_00 = zeros(data.N_BSs*data.N_inner_users + 1, length(x_axis), sum(feasible));
-    EEi_NOMA_00 = zeros(data.N_BSs*data.N_inner_users + 1, length(x_axis), sum(feasible));
-    EEi_JT_050 = zeros(data.N_BSs*data.N_inner_users + 1, length(x_axis), sum(feasible));
-    EEi_NOMA_050 = zeros(data.N_BSs*data.N_inner_users + 1, length(x_axis), sum(feasible));
-    EEi_JT_250 = zeros(data.N_BSs*data.N_inner_users + 1, length(x_axis), sum(feasible));
-    EEi_NOMA_250 = zeros(data.N_BSs*data.N_inner_users + 1, length(x_axis), sum(feasible));
-    for bs=1:data.N_BSs
-        for ii = 1:N_users-1
-            EEi_JT_00(two_dim_2_one_dim(ii, bs, N_users, false), :, :) = squeeze(R_JT_00(:,ii,bs,feasible)./tot_user_power_i_bs_JT_00(:,ii,bs,feasible));
-            EEi_NOMA_00(two_dim_2_one_dim(ii, bs, N_users, false), :, :) = squeeze(R_NOMA_00(:,ii,bs,feasible)./tot_user_power_i_bs_NOMA_00(:,ii,bs,feasible));
-            EEi_JT_050(two_dim_2_one_dim(ii, bs, N_users, false), :, :) = squeeze(R_JT_050(:,ii,bs,feasible)./tot_user_power_i_bs_JT_050(:,ii,bs,feasible));
-            EEi_NOMA_050(two_dim_2_one_dim(ii, bs, N_users, false), :, :) = squeeze(R_NOMA_050(:,ii,bs,feasible)./tot_user_power_i_bs_NOMA_050(:,ii,bs,feasible));
-            EEi_JT_250(two_dim_2_one_dim(ii, bs, N_users, false), :, :) = squeeze(R_JT_250(:,ii,bs,feasible)./tot_user_power_i_bs_JT_250(:,ii,bs,feasible));
-            EEi_NOMA_250(two_dim_2_one_dim(ii, bs, N_users, false), :, :) = squeeze(R_NOMA_250(:,ii,bs,feasible)./tot_user_power_i_bs_NOMA_250(:,ii,bs,feasible));
-            
-            [EE_JT_00, EE_JT_00_CI] = mean_confidence_interval( squeeze(R_JT_00(:,ii,bs,feasible)./tot_user_power_i_bs_JT_00(:,ii,bs,feasible)) );
-            [EE_NOMA_00, EE_NOMA_00_CI] = mean_confidence_interval( squeeze(R_NOMA_00(:,ii,bs,feasible)./tot_user_power_i_bs_NOMA_00(:,ii,bs,feasible)) );
-            [EE_JT_050, EE_JT_050_CI] = mean_confidence_interval( squeeze(R_JT_050(:,ii,bs,feasible)./tot_user_power_i_bs_JT_050(:,ii,bs,feasible)) );
-            [EE_NOMA_050, EE_NOMA_050_CI] = mean_confidence_interval( squeeze(R_NOMA_050(:,ii,bs,feasible)./tot_user_power_i_bs_NOMA_050(:,ii,bs,feasible)) );
-            [EE_JT_250, EE_JT_250_CI] = mean_confidence_interval( squeeze(R_JT_250(:,ii,bs,feasible)./tot_user_power_i_bs_JT_250(:,ii,bs,feasible)) );
-            [EE_NOMA_250, EE_NOMA_250_CI] = mean_confidence_interval( squeeze(R_NOMA_250(:,ii,bs,feasible)./tot_user_power_i_bs_NOMA_250(:,ii,bs,feasible)) );
-            
-            
-            figure;
-            hAx=axes;
-            errorbar(x_axis,EE_JT_00,EE_JT_00_CI(:,2),'-+b','LineWidth',1)
-            hold on,
-            errorbar(x_axis,EE_NOMA_00,EE_NOMA_00_CI(:,2),'-.ok','LineWidth',1),
-            hold on,
-            errorbar(x_axis,EE_JT_050,EE_JT_050_CI(:,2),'-+b','LineWidth',1)
-            hold on,
-            errorbar(x_axis,EE_NOMA_050,EE_NOMA_050_CI(:,2),'-.ok','LineWidth',1),
-            hold on,
-            errorbar(x_axis,EE_JT_250,EE_JT_250_CI(:,2),'-+b','LineWidth',1)
-            hold on,
-            errorbar(x_axis,EE_NOMA_250,EE_NOMA_250_CI(:,2),'-.ok','LineWidth',1),
-            hold on,
-            legend('EE JT-CoMP-NOMA','EE Conventional NOMA');
-            xlabel('Minimum data rate requirement (Kbps)');
-            ylabel('Average energy efficiency (b/s/Joule)');
-            hAx.YScale='log';
-            title(sprintf('User %d BS %d',ii,bs));
-        end
-    end
-    
-    [EE_JT_00, EE_JT_00_CI] = mean_confidence_interval( squeeze(R_JT_00(:,N_users,1,feasible)./sum(tot_user_power_i_bs_JT_00(:,N_users,:,feasible),3)) );
-    [EE_NOMA_00, EE_NOMA_00_CI] = mean_confidence_interval( squeeze(R_NOMA_00(:,N_users,1,feasible)./tot_user_power_i_bs_NOMA_00(:,N_users,1,feasible)) );
-    [EE_JT_050, EE_JT_050_CI] = mean_confidence_interval( squeeze(R_JT_050(:,N_users,1,feasible)./sum(tot_user_power_i_bs_JT_050(:,N_users,:,feasible),3)) );
-    [EE_NOMA_050, EE_NOMA_050_CI] = mean_confidence_interval( squeeze(R_NOMA_050(:,N_users,1,feasible)./tot_user_power_i_bs_NOMA_050(:,N_users,1,feasible)) );
-    [EE_JT_250, EE_JT_250_CI] = mean_confidence_interval( squeeze(R_JT_250(:,N_users,1,feasible)./sum(tot_user_power_i_bs_JT_250(:,N_users,:,feasible),3)) );
-    [EE_NOMA_250, EE_NOMA_250_CI] = mean_confidence_interval( squeeze(R_NOMA_250(:,N_users,1,feasible)./tot_user_power_i_bs_NOMA_250(:,N_users,1,feasible)) );
-    
-    EEi_JT_00(two_dim_2_one_dim(N_users, 1, N_users, false), :, :) = squeeze(R_JT_00(:,N_users,1,feasible)./sum(tot_user_power_i_bs_JT_00(:,N_users,:,feasible),3));
-    EEi_NOMA_00(two_dim_2_one_dim(N_users, 1, N_users, false), :, :) = squeeze(R_NOMA_00(:,N_users,1,feasible)./tot_user_power_i_bs_NOMA_00(:,N_users,1,feasible));
-    EEi_JT_050(two_dim_2_one_dim(N_users, 1, N_users, false), :, :) = squeeze(R_JT_050(:,N_users,1,feasible)./sum(tot_user_power_i_bs_JT_050(:,N_users,:,feasible),3));
-    EEi_NOMA_050(two_dim_2_one_dim(N_users, 1, N_users, false), :, :) = squeeze(R_NOMA_050(:,N_users,1,feasible)./tot_user_power_i_bs_NOMA_050(:,N_users,1,feasible));
-    EEi_JT_250(two_dim_2_one_dim(N_users, 1, N_users, false), :, :) = squeeze(R_JT_250(:,N_users,1,feasible)./sum(tot_user_power_i_bs_JT_250(:,N_users,:,feasible),3));
-    EEi_NOMA_250(two_dim_2_one_dim(N_users, 1, N_users, false), :, :) = squeeze(R_NOMA_250(:,N_users,1,feasible)./tot_user_power_i_bs_NOMA_250(:,N_users,1,feasible));
-    
-    save('workspaces/figures_data.mat','EEi_JT_00','EEi_NOMA_00','EEi_JT_050','EEi_NOMA_050','EEi_JT_250','EEi_NOMA_250','-append');
-    
-    figure;
-    hAx=axes;
-    errorbar(x_axis,EE_JT_00,EE_JT_00_CI(:,2),'-+b','LineWidth',1)
-    hold on,
-    errorbar(x_axis,EE_NOMA_00,EE_NOMA_00_CI(:,2),'-.ok','LineWidth',1),
-    hold on,
-    errorbar(x_axis,EE_JT_050,EE_JT_050_CI(:,2),'-+b','LineWidth',1)
-    hold on,
-    errorbar(x_axis,EE_NOMA_050,EE_NOMA_050_CI(:,2),'-.ok','LineWidth',1),
-    hold on,
-    errorbar(x_axis,EE_JT_250,EE_JT_250_CI(:,2),'-+b','LineWidth',1)
-    hold on,
-    errorbar(x_axis,EE_NOMA_250,EE_NOMA_250_CI(:,2),'-.ok','LineWidth',1),
-    hold on,
-    legend('EE JT-CoMP-NOMA','EE Conventional NOMA');
-    xlabel('Minimum data rate requirement (Kbps)');
-    ylabel('Average energy efficiency (b/s/Joule)');
-    hAx.YScale='log';
-    title(sprintf('User %d (Edge User)',N_users)); 
-    
-end
+ 

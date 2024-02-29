@@ -1,39 +1,6 @@
 function [] = plot_results(filepath, plot_outage, plot_iter, plot_throughput, plot_EE, plot_EC, plot_individual_EE)
-% plot_outage = false;
-% plot_iter = false;
-% plot_throughput = false;
-% plot_EE = false;
-% plot_EC = false;
-% plot_individual_EE = true;
 
 data = load(filepath);
-
-data.kappa_aux = 0.5; % remove this.
-
-%data_kappa_250 = load("workspaces\2022_11_19_14_04_workspace_PCM_proposed_kappa_2_50_rho_0_10_100samp.mat");
-%data_kappa_050 =
-%load("workspaces\2022_11_19_14_04_workspace_PCM_proposed_kappa_0_50_rho_0_10_100samp.mat"); %With local
-%data_kappa_050 = load("workspaces\2022_11_27_23_00_workspace_PCM_proposed_kappa_0_50_rho_0_10_100samp.mat"); %without local
-%data_kappa_00 = load("workspaces\2022_11_19_14_03_workspace_PCM_M2_kappa_0_00_rho_0_10_100samp.mat");
-
-
-
-%data_PCM1 = load("workspaces\2022_11_23_10_11_workspace_PCM_M1_kappa_0_00_rho_0_00_100samp.mat");
-%data_PCM2 = load("workspaces\2022_11_26_00_30_workspace_PCM_M2_kappa_0_00_rho_0_00_100samp.mat");
-data_PCM1 = load("workspaces\2022_12_08_18_31_workspace_PCM_M1_kappa_0_00_rho_0_00_100samp.mat");
-data_PCM2 = load("workspaces\2022_12_09_00_25_workspace_PCM_M2_kappa_0_00_rho_0_00_100samp.mat");
-data_kappa_00 = load("workspaces\2022_12_12_15_50_workspace_PCM_proposed_kappa_0_00_rho_0_10_100samp.mat"); % Without local
-data_kappa_050 = load('workspaces\2022_12_08_18_32_workspace_PCM_proposed_kappa_0_50_rho_0_10_100samp.mat');
-%data_kappa_250 = load("workspaces\2022_12_11_23_16_workspace_PCM_proposed_kappa_2_50_rho_0_10_100samp.mat"); % Without local
-data_kappa_250 = load("workspaces\2022_12_11_23_18_workspace_PCM_proposed_kappa_2_50_rho_0_10_100samp.mat");
-
-
-
-
-% w=5
-% data_PCM1 = load("workspaces\2022_12_01_00_00_workspace_PCM_M1_kappa_0_00_rho_0_00_100samp.mat");
-% data_PCM2 = load("workspaces\2022_12_01_00_42_workspace_PCM_M2_kappa_0_00_rho_0_00_100samp.mat");
-% data_kappa_050 = load("workspaces\2022_11_30_23_49_workspace_PCM_proposed_kappa_0_50_rho_0_10_100samp.mat"); 
 
 x_axis = data.x_axis;
 N_samples = data.N_samples;
@@ -63,6 +30,9 @@ feasible_LOCAL = (~sum((data.Exit_EE_local < 0),1)>0) & simu_samps & sum(isnan(d
 % Remove the outage scenarios from all simulations
 feasible_all = feasible_JT & feasible_NOMA & feasible_LOCAL;
 
+feasible_and_same_transmiting_BS = feasible_JT & feasible_NOMA & (squeeze(data.Pi_EE_S1_global(1,end,:)) == 0).';
+%feasible_all = feasible_and_same_transmiting_BS;
+
 
 if(plot_outage)
     figure, 
@@ -76,12 +46,6 @@ if(plot_outage)
     title('Outage rate');
     legend('Conventional NOMA', 'JT-CoMP NOMA', 'Local DPS-CoMP NOMA','Location', 'southeast')
 end
-
-% overall_outage = (Exit_EE_S1 <= 0) + (Exit_EE_S3 <= 0) + (Exit_S1 <= 0) + (Exit_S3 <= 0) > 0;
-% figure, plot(x_axis,mean(overall_outage,2),'-+b','LineWidth',1)
-% xlabel('Minimum data rate requirement (Kbps)');
-% ylabel('Outage probability');
-% title('Overall Outage');
 
 
 if (plot_iter)
@@ -142,138 +106,6 @@ if(plot_throughput)
     hAx.YScale='log';
 end
 
-% %figure, boxplot(R_tot_EE_S3_global(:,samples).', x_axis)
-% 
-% bpColors = cool(length(x_axis));
-% %R_tot_EE_S1_global(R_tot_EE_S1_global == 0) = NaN;
-% %R_tot_EE_S3_global(R_tot_EE_S3_global == 0) = NaN;
-% data = {R_tot_EE_S1_global(:,samples).', R_tot_EE_S3_global(:,samples).'};
-% figure,boxplotGroup(data, 'PrimaryLabels', {'JT' 'Conv.'}, ...
-%   'SecondaryLabels',cellstr(string(x_axis)), 'InterGroupSpace', 1, ...
-%   'BoxStyle','filled',...
-%     'Colors',bpColors,'GroupType','withinGroups')
-% title('Global solution - Average throughput');
-% 
-% 
-% 
-% % OBS.: It seems that forcing the edge user to be in the first BS cluster 
-% % makes the samples with both JT and Conv feasible be only the ones where
-% % the channel BS1 -> edge user is good.
-% figure,
-% hold on,
-% xlabel('gamma BS 1 to edge user');
-% ylabel('gamma BS 2 to edge user');
-% title('Feasibility for all R_{min} for both JT and conv.')
-% legended1 = false;
-% legended2 = false;
-% for samp = 1:N_samples
-%     if(samples(samp))
-%         if(legended1 == true)
-%             h = plot(gamma_values(N_inner_users+N_JT_users,1,1,samp),gamma_values(N_inner_users+N_JT_users,2,2,samp),'g.');
-%             h.Annotation.LegendInformation.IconDisplayStyle = 'off';
-%         else
-%             plot(gamma_values(N_inner_users+N_JT_users,1,1,samp),gamma_values(N_inner_users+N_JT_users,2,2,samp),'g.', 'DisplayName','Feasible for all R_{min}')
-%         end
-%         legended1 = true;
-%     else
-%         if(legended2 == true)
-%             h = plot(gamma_values(N_inner_users+N_JT_users,1,1,samp),gamma_values(N_inner_users+N_JT_users,2,2,samp),'r.');
-%             h.Annotation.LegendInformation.IconDisplayStyle = 'off';
-%         else
-%             plot(gamma_values(N_inner_users+N_JT_users,1,1,samp),gamma_values(N_inner_users+N_JT_users,2,2,samp),'r.', 'DisplayName','Infeasible for some R_{min}')
-%         end
-%         legended2 = true;
-%     end
-% end
-% hold off
-% lgd = legend;
-% 
-% 
-% % Feasibility for JT
-% figure,
-% hold on,
-% xlabel('gamma BS 1 to edge user');
-% ylabel('gamma BS 2 to edge user');
-% title('Feasibility for all R_{min} for JT')
-% legended1 = false;
-% legended2 = false;
-% for samp = 1:N_samples
-%     if(sum(Exit_EE_S1_global(:,samp)~=1)==0)
-%         if(legended1 == true)
-%             h = plot(gamma_values(N_inner_users+N_JT_users,1,1,samp),gamma_values(N_inner_users+N_JT_users,2,2,samp),'g.');
-%             h.Annotation.LegendInformation.IconDisplayStyle = 'off';
-%         else
-%             plot(gamma_values(N_inner_users+N_JT_users,1,1,samp),gamma_values(N_inner_users+N_JT_users,2,2,samp),'g.', 'DisplayName','Feasible for all R_{min}')
-%         end
-%         legended1 = true;
-%     else
-%         if(legended2 == true)
-%             h = plot(gamma_values(N_inner_users+N_JT_users,1,1,samp),gamma_values(N_inner_users+N_JT_users,2,2,samp),'r.');
-%             h.Annotation.LegendInformation.IconDisplayStyle = 'off';
-%         else
-%             plot(gamma_values(N_inner_users+N_JT_users,1,1,samp),gamma_values(N_inner_users+N_JT_users,2,2,samp),'r.', 'DisplayName','Infeasible for some R_{min}')
-%         end
-%         legended2 = true;
-%     end
-% end
-% hold off
-% lgd = legend;
-% 
-% % Feasibility for Conventional
-% figure,
-% hold on,
-% xlabel('gamma BS 1 to edge user');
-% ylabel('gamma BS 2 to edge user');
-% title('Feasibility for all R_{min} for conv.')
-% legended1 = false;
-% legended2 = false;
-% legended3 = false;
-% for samp = 1:N_samples
-%     if(sum(Exit_EE_S3_global(:,samp)~=1)==0)
-%         if(Pi_EE_S1_global(1,3,samp)==0)
-%             if(sum(Pi_EE_S1_global(:,3,samp))~=0) % Both BSs transmit with power ~= 0
-%                 color = 'y.';
-%             else
-%                 color = 'b.';
-%             end
-%         else
-%             color = 'g.';
-%         end
-%         if(legended1 == true)
-%             if(Pi_EE_S1_global(1,3,samp)~=0 || legended3)
-%                 h = plot(gamma_values(N_inner_users+N_JT_users,1,1,samp),gamma_values(N_inner_users+N_JT_users,2,2,samp),color);
-%                 h.Annotation.LegendInformation.IconDisplayStyle = 'off';
-%             else
-%                 plot(gamma_values(N_inner_users+N_JT_users,1,1,samp),gamma_values(N_inner_users+N_JT_users,2,2,samp),color, 'DisplayName','Feasible for all R_{min} | P = 0 at BS1 for CoMP user')
-%                 legended3 = true;
-%             end
-%         else
-%                 plot(gamma_values(N_inner_users+N_JT_users,1,1,samp),gamma_values(N_inner_users+N_JT_users,2,2,samp),color, 'DisplayName','Feasible for all R_{min}')
-%                 legended1 = true;
-%         end
-%         
-%     else
-%         if(legended2 == true)
-%             h = plot(gamma_values(N_inner_users+N_JT_users,1,1,samp),gamma_values(N_inner_users+N_JT_users,2,2,samp),'r.');
-%             h.Annotation.LegendInformation.IconDisplayStyle = 'off';
-%         else
-%             plot(gamma_values(N_inner_users+N_JT_users,1,1,samp),gamma_values(N_inner_users+N_JT_users,2,2,samp),'r.', 'DisplayName','Infeasible for some R_{min}')
-%         end
-%         legended2 = true;
-%     end
-% end
-% hold off
-% lgd = legend;
-
-% % power difference S1 vs S3
-% samples2 = (samples - (squeeze(Pi_EE_S1_global(1,3,:)==0).' & samples))==1;
-% P_diff = (abs(Pi_EE_S3_global(:,:,samples2) - Pi_EE_S1_global(:,1:5,samples2))./Pi_EE_S1_global(:,1:5,samples2))*100;
-% 
-% figure,
-% plot(x_axis, mean(mean(P_diff,3),2))
-% xlabel('Minimum data rate requirement (Kbps)');
-% ylabel('Average power difference (%)');
-% title('Difference in the allocated power for JT and conv.')
 
 
 % Computes the system power expenditure
@@ -292,7 +124,7 @@ for r=1:length(data.R_Kbps)
         Pi_sys_EE_S3_global_PCM1(r,ss) = system_power_consumption(data.Pi_EE_S3_global(r,:,ss), data.gamma, 0, 0, 0, false, false);
         Pi_sys_EE_local_PCM1(r,ss) = system_power_consumption(data.Pi_EE_local(r,:,ss), data.gamma, 0, 0, 0, false, false);
         
-        % TODO: Do I consider rho here? Check in the paper
+
 %         Pi_sys_EE_S1_global_PCM2(r,ss) = system_power_consumption(data.Pi_EE_S1_global(r,:,ss), data.gamma, data.rho_aux, data.P_fix_aux, 0, true, false);
 %         Pi_sys_EE_S3_global_PCM2(r,ss) = system_power_consumption(data.Pi_EE_S3_global(r,:,ss), data.gamma, data.rho_aux, data.P_fix_aux, 0, false, false);
 %         Pi_sys_EE_local_PCM2(r,ss) = system_power_consumption(data.Pi_EE_local(r,:,ss), data.gamma, data.rho_aux, data.P_fix_aux, 0, false, false);
@@ -305,151 +137,6 @@ for r=1:length(data.R_Kbps)
         Pi_sys_EE_local_prop(r,ss) = system_power_consumption(data.Pi_EE_local(r,:,ss), data.gamma, data.rho_aux, data.P_fix_aux, data.kappa_aux, false, false);
     end
 end 
-
-
-
-EE_var_kappa = true;
-if(EE_var_kappa)    
-    %figure, boxplot(R_tot_EE_S3_global(:,feasible_all).', x_axis)
-    
-    [R_JT_00, R_NOMA_00, R_LOCAL_00, Pi_sys_JT_00, Pi_sys_NOMA_00, Pi_sys_local_00, feasible_JT_00, feasible_NOMA_00, feasible_LOCAL_00] = prepare_data_box(data_kappa_00);
-    [R_JT_050, R_NOMA_050, R_LOCAL_050, Pi_sys_JT_050, Pi_sys_NOMA_050, Pi_sys_local_050, feasible_JT_050, feasible_NOMA_050, feasible_LOCAL_050] = prepare_data_box(data_kappa_050);
-    [R_JT_250, R_NOMA_250, R_LOCAL_250, Pi_sys_JT_250, Pi_sys_NOMA_250, Pi_sys_local_250, feasible_JT_250, feasible_NOMA_250, feasible_LOCAL_250] = prepare_data_box(data_kappa_250);
-    
-    R_idx = 4;
-    feasible = feasible_JT_00 & feasible_JT_050 & feasible_JT_250 & feasible_NOMA_00 & feasible_NOMA_050 & feasible_NOMA_250;
-    EE_00 = (R_JT_00(R_idx,feasible)./Pi_sys_JT_00(R_idx,feasible)).';
-    EE_050 = (R_JT_050(R_idx,feasible)./Pi_sys_JT_050(R_idx,feasible)).';
-    EE_250 = (R_JT_250(R_idx,feasible)./Pi_sys_JT_250(R_idx,feasible)).';
-    NOMA_00 = (R_NOMA_00(R_idx,feasible)./Pi_sys_NOMA_00(R_idx,feasible)).';
-    NOMA_050 = (R_NOMA_050(R_idx,feasible)./Pi_sys_NOMA_050(R_idx,feasible)).';
-    NOMA_250 = (R_NOMA_250(R_idx,feasible)./Pi_sys_NOMA_250(R_idx,feasible)).';
-    %min_size = min([length(EE_00), length(EE_050), length(EE_250)]);
-    
-    %figure, boxplot([EE_00(1:min_size), EE_050(1:min_size), EE_250(1:min_size)], ["kappa = 0","kappa = 0.5","kappa = 2.5"])
-    
-    box_data = {[EE_00, EE_050, EE_250], [NOMA_00, NOMA_050, NOMA_250]};
-    figure,boxplotGroup(box_data, 'PrimaryLabels', {'JT' 'Conv.'}, ...
-      'SecondaryLabels',cellstr(["\kappa = 0","\kappa = 0.5","\kappa = 2.5"]), 'InterGroupSpace', 1, ...
-       'GroupType','withinGroups')
-    title('Energy Efficiency');
-    ylabel('System energy efficiency (b/s/Joule)')
-    
-    
-    
-%     R_idx = 4;
-%     EE_00 = (R_JT_00(R_idx,feasible_JT_00)./Pi_sys_JT_00(R_idx,feasible_JT_00)).';
-%     EE_050 = (R_JT_050(R_idx,feasible_JT_050)./Pi_sys_JT_050(R_idx,feasible_JT_050)).';
-%     EE_250 = (R_JT_250(R_idx,feasible_JT_250)./Pi_sys_JT_250(R_idx,feasible_JT_250)).';
-%     NOMA_00 = (R_NOMA_00(R_idx,feasible_NOMA_00)./Pi_sys_NOMA_00(R_idx,feasible_NOMA_00)).';
-%     NOMA_050 = (R_NOMA_050(R_idx,feasible_NOMA_050)./Pi_sys_NOMA_050(R_idx,feasible_NOMA_050)).';
-%     NOMA_250 = (R_NOMA_250(R_idx,feasible_NOMA_250)./Pi_sys_NOMA_250(R_idx,feasible_NOMA_250)).';
-%     min_size = min([length(EE_00), length(EE_050), length(EE_250), length(NOMA_00), length(NOMA_050), length(NOMA_250)]);
-%     
-%     box_data = {[EE_00(1:min_size), EE_050(1:min_size), EE_250(1:min_size)], [NOMA_00(1:min_size), NOMA_050(1:min_size), NOMA_250(1:min_size)]};
-%     figure,boxplotGroup(box_data, 'PrimaryLabels', {'JT' 'Conv.'}, ...
-%       'SecondaryLabels',cellstr(["\kappa = 0","\kappa = 0.5","\kappa = 2.5"]), 'InterGroupSpace', 1, ...
-%        'GroupType','withinGroups')
-%     title('Energy Efficiency');
-%     ylabel('System energy efficiency (b/s/Joule)')
-end
-
-EE_PCMs = true;
-if(EE_PCMs)    
-    aux_kappa = 0.5;
-    aux_rho = 0.1;
-    aux_P_fix = 1;
-    [R_JT_PCM1, R_NOMA_PCM1, R_LOCAL_PCM1, Pi_sys_JT_PCM1, Pi_sys_NOMA_PCM1, Pi_sys_local_PCM1, feasible_JT_PCM1, feasible_NOMA_PCM1, feasible_LOCAL_PCM1] = prepare_data_box(data_PCM1, aux_kappa, aux_rho, aux_P_fix);
-    [R_JT_PCM2, R_NOMA_PCM2, R_LOCAL_PCM2, Pi_sys_JT_PCM2, Pi_sys_NOMA_PCM2, Pi_sys_local_PCM2, feasible_JT_PCM2, feasible_NOMA_PCM2, feasible_LOCAL_PCM2] = prepare_data_box(data_PCM2, aux_kappa, aux_rho, aux_P_fix);
-    [R_JT_050, R_NOMA_050, R_LOCAL_050, Pi_sys_JT_050, Pi_sys_NOMA_050, Pi_sys_local_050, feasible_JT_050, feasible_NOMA_050, feasible_LOCAL_050] = prepare_data_box(data_kappa_050, aux_kappa, aux_rho, aux_P_fix);
-    %[R_JT_250, R_NOMA_250, R_LOCAL_250, Pi_sys_JT_250, Pi_sys_NOMA_250, Pi_sys_local_250, feasible_JT_250, feasible_NOMA_250, feasible_LOCAL_250] = prepare_data_box(data_kappa_250, aux_kappa, aux_rho, aux_P_fix);
-    
-    feasible = feasible_JT_PCM1 & feasible_JT_PCM2 & feasible_JT_050; %& feasible_JT_250;
-    [EE_EE_t_JT_PCM1, EE_EE_t_CI_JT_PCM1] = mean_confidence_interval(R_JT_PCM1(:,feasible)./Pi_sys_JT_PCM1(:,feasible));
-    [EE_EE_t_JT_PCM2, EE_EE_t_CI_JT_PCM2] = mean_confidence_interval(R_JT_PCM2(:,feasible)./Pi_sys_JT_PCM2(:,feasible));
-    [EE_EE_t_JT_prop, EE_EE_t_CI_JT_prop] = mean_confidence_interval(R_JT_050(:,feasible)./Pi_sys_JT_050(:,feasible));
-    %[EE_EE_t_JT_prop_250, EE_EE_t_CI_JT_prop_250] = mean_confidence_interval(R_JT_250(:,feasible)./Pi_sys_JT_250(:,feasible));
-    
-%     feasible = feasible_NOMA_PCM1 & feasible_NOMA_PCM2 & feasible_NOMA_050;
-%     [EE_EE_t_JT_PCM1, EE_EE_t_CI_JT_PCM1] = mean_confidence_interval(R_NOMA_PCM1(:,feasible)./Pi_sys_NOMA_PCM1(:,feasible));
-%     [EE_EE_t_JT_PCM2, EE_EE_t_CI_JT_PCM2] = mean_confidence_interval(R_NOMA_PCM2(:,feasible)./Pi_sys_NOMA_PCM2(:,feasible));
-%     [EE_EE_t_JT_prop, EE_EE_t_CI_JT_prop] = mean_confidence_interval(R_NOMA_050(:,feasible)./Pi_sys_NOMA_050(:,feasible));
-    
-    figure,
-    hAx=axes;
-    errorbar(x_axis,EE_EE_t_JT_PCM1, EE_EE_t_CI_JT_PCM1(:,2),'-+b','LineWidth',1),
-    hold on,
-    errorbar(x_axis,EE_EE_t_JT_PCM2, EE_EE_t_CI_JT_PCM2(:,2),'-.ok','LineWidth',1),
-    hold on,
-    errorbar(x_axis,EE_EE_t_JT_prop, EE_EE_t_CI_JT_prop(:,2),'-.og','LineWidth',1),
-    %hold on,
-    %errorbar(x_axis,EE_EE_t_JT_prop_250, EE_EE_t_CI_JT_prop_250(:,2),'-.og','LineWidth',1),
-    hold on,
-    %legend('Opt. PCM 1','Opt. PCM 2','Opt. PCM prop. \kappa = 0.50','Opt. PCM prop. \kappa = 2.50');
-    legend('Opt. PCM 1','Opt. PCM 2','Opt. PCM prop. \kappa = 0.50');
-    xlabel('Minimum data rate requirement (Kbps)');
-    ylabel('Average energy efficiency (b/s/Joule)');
-    title(sprintf('JT - Evaluated with PCM prop (rho = %0.2f, kappa = %0.2f, P_{fix} = %0.2f)', aux_rho, aux_kappa, aux_P_fix));
-    %hAx.YScale='log';
-    
-    [TP_EE_t_JT_PCM1, TP_EE_t_CI_JT_PCM1] = mean_confidence_interval(R_JT_PCM1(:,feasible));
-    [TP_EE_t_JT_PCM2, TP_EE_t_CI_JT_PCM2] = mean_confidence_interval(R_JT_PCM2(:,feasible));
-    [TP_EE_t_JT_prop, TP_EE_t_CI_JT_prop] = mean_confidence_interval(R_JT_050(:,feasible));
-    %[EE_EE_t_JT_prop_250, EE_EE_t_CI_JT_prop_250] = mean_confidence_interval(R_JT_250(:,feasible));
-    
-    figure,
-    hAx=axes;
-    errorbar(x_axis,TP_EE_t_JT_PCM1, TP_EE_t_CI_JT_PCM1(:,2),'-+b','LineWidth',1),
-    hold on,
-    errorbar(x_axis,TP_EE_t_JT_PCM2, TP_EE_t_CI_JT_PCM2(:,2),'-.ok','LineWidth',1),
-    hold on,
-    errorbar(x_axis,TP_EE_t_JT_prop, TP_EE_t_CI_JT_prop(:,2),'-.og','LineWidth',1),
-    hold on,
-    plot(x_axis, (data_PCM1.N_BSs*data_PCM1.N_inner_users + data_PCM1.N_JT_users)*data_PCM1.R,'-r','LineWidth',1)
-    legend('Opt. PCM 1','Opt. PCM 2','Opt. PCM prop. \kappa = 0.50');
-    xlabel('Minimum data rate requirement (Kbps)');
-    ylabel('Average throughput (b/s)');
-    title(sprintf('JT - Evaluated with PCM prop (rho = %0.2f, kappa = %0.2f, P_{fix} = %0.2f)', aux_rho, aux_kappa, aux_P_fix));
-    %hAx.YScale='log';
-    
-    
-    aloc_power_JT_PCM1 = squeeze(sum(data_PCM1.Pi_EE_S1_global,2));
-    aloc_power_NOMA_PCM1 = squeeze(sum(data_PCM1.Pi_EE_S3_global,2));
-    aloc_power_LOCAL_PCM1 = squeeze(sum(data_PCM1.Pi_EE_local,2));
-
-    aloc_power_JT_PCM2 = squeeze(sum(data_PCM2.Pi_EE_S1_global,2));
-    aloc_power_NOMA_PCM2 = squeeze(sum(data_PCM2.Pi_EE_S3_global,2));
-    aloc_power_LOCAL_PCM2 = squeeze(sum(data_PCM2.Pi_EE_local,2));
-    
-    aloc_power_JT_PCMprop = squeeze(sum(data_kappa_050.Pi_EE_S1_global,2));
-    aloc_power_NOMA_PCMprop = squeeze(sum(data_kappa_050.Pi_EE_S3_global,2));
-    aloc_power_LOCAL_PCMprop = squeeze(sum(data_kappa_050.Pi_EE_local,2));
-            
-              
-    [avg_aloc_power_JT_PCM1, ~] = mean_confidence_interval(aloc_power_JT_PCM1(:, feasible_JT_PCM1));
-    [avg_aloc_power_JT_PCM2, ~] = mean_confidence_interval(aloc_power_JT_PCM2(:, feasible_JT_PCM2));
-    [avg_aloc_power_JT_PCMprop, ~] = mean_confidence_interval(aloc_power_JT_PCMprop(:, feasible_JT_050));
-    
-    
-    rates = [1,4,7];
-    box_data = {(R_tot_EE_S1_global(rates,feasible_all)./Pi_sys_EE_S1_global_prop(rates,feasible_all)).', (R_tot_EE_S3_global(rates,feasible_all)./Pi_sys_EE_S3_global_prop(rates,feasible_all)).', (R_tot_EE_local(rates,feasible_all)./Pi_sys_EE_local_prop(rates,feasible_all)).'};
-    figure,boxplotGroup(box_data, 'PrimaryLabels', {'JT' 'Conv.', 'ILO'}, ...
-      'SecondaryLabels',cellstr(string(x_axis(rates))), 'InterGroupSpace', 1, ...
-       'GroupType','withinGroups')
-    title('Energy Efficiency');
-    ylabel('System energy efficiency (b/s/Joule)')
-    
-    
-    rates = [1,4,7];
-    box_data = {(R_tot_EE_S1_global(rates,feasible_all)).', (R_tot_EE_S3_global(rates,feasible_all)).', (R_tot_EE_local(rates,feasible_all)).'};
-    figure,boxplotGroup(box_data, 'PrimaryLabels', {'JT' 'Conv.', 'ILO'}, ...
-      'SecondaryLabels',cellstr(string(x_axis(rates))), 'InterGroupSpace', 1, ...
-       'GroupType','withinGroups')
-    %title('Throughput');
-    ylabel('Average throughput (b/s)')
-    
-end
-
 
 
 
@@ -535,6 +222,8 @@ end
 
 % --- Energy consumption plots -----
 if(plot_EC)
+    %feasible_and_same_transmiting_BS = feasible_JT & feasible_NOMA & (squeeze(data.Pi_EE_S1_global(1,6,:)) == 0).';
+    %feasible_all = feasible_and_same_transmiting_BS;
     [EC_EE_t_S1_global, EC_EE_t_CI_S1_global] = mean_confidence_interval(Pi_sys_EE_S1_global_PCM1(:,feasible_all));
     [EC_EE_t_S3_global, EC_EE_t_CI_S3_global] = mean_confidence_interval(Pi_sys_EE_S3_global_PCM1(:,feasible_all));
     [EC_EE_t_local, EC_EE_t_CI_local] = mean_confidence_interval(Pi_sys_EE_local_PCM1(:,feasible_all));
@@ -565,7 +254,7 @@ if(plot_EC)
     title('Global Solution');
 end
 
-plot_individual_TP = false;
+plot_individual_TP = true;
 if (plot_individual_TP)
 % samples x N_users
     R_idx = 4;
@@ -574,8 +263,8 @@ if (plot_individual_TP)
     Ri_JT = [squeeze(Ri_JT).', squeeze(R_EE_S1_global(R_idx,1:data.N_inner_users,2, feasible_JT & feasible_NOMA)).'];
     Ri_NOMA = [squeeze(Ri_NOMA).', squeeze(R_EE_S3_global(R_idx,1:data.N_inner_users,2, feasible_JT & feasible_NOMA)).'];
     
-    data = {Ri_JT, Ri_NOMA};
-    figure,boxplotGroup(data, 'PrimaryLabels', {'JT' 'Conv.'}, ...
+    box_data = {Ri_JT, Ri_NOMA};
+    figure,boxplotGroup(box_data, 'PrimaryLabels', {'JT' 'Conv.'}, ...
       'SecondaryLabels',cellstr(["User 1","User 2", "edge user", "User 1 (BS2)","User 2 (BS2)"]), 'InterGroupSpace', 1, ...
        'GroupType','withinGroups')
     title(sprintf('Throughput - %s',PCM_text));

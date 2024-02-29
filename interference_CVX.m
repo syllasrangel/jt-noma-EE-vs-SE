@@ -30,7 +30,6 @@ function [ICI, INUI, INUI_jk] = interference_CVX(gamma, isJT, P_i, ICI, INUI, IN
         for k = 1:J_b(bs1)
             for bs2 = 1:N_BSs
                 if(bs1~=bs2)
-                    %for j = 1:(J_b(bs2) - isJT) % When JT it does not consider interference from the cell-edge user
                     for j = 1:(J_b(bs2) - ( isJT && k == J_b(bs2) ) ) % When JT it does not consider interference from the cell-edge user on itself
                         ICI(k,bs1) = ICI(k,bs1) + P_ib(j,bs2).*gamma(k,bs1,bs2);
                     end

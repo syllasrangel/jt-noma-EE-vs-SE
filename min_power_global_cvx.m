@@ -1,4 +1,4 @@
-function [P_i, status] = min_power_global_cvx(Pt, BW, w, R, R_min_JT_user, gamma, isJT)
+function [P_i, status] = min_power_global_cvx(Pt, BW, w, R, R_min_JT_user, gamma, isJT, SIC_constraint)
 [N_users, N_BSs, ~] = size(gamma);
 N_inner_users = N_users - 1;
 
@@ -19,10 +19,11 @@ cvx_begin quiet
     variable P_i(length_Pi);
     expression INUI(N_inner_users+1, N_BSs)
     expression ICI(N_inner_users+1, N_BSs)
+    expression INUI_jk(N_inner_users+1, N_BSs, N_inner_users+1)
     minimize( obj_func(P_i) );
     subject to
         % ICI and inter-NOMA-user interference (INUI) calculation
-        [ICI, INUI] = interference_CVX(gamma, isJT, P_i, ICI, INUI);
+        [ICI, INUI, INUI_jk] = interference_CVX(gamma, isJT, P_i, ICI, INUI, INUI_jk);
 
         % === Rate requirement inner users ===
         for bs = 1:N_BSs
@@ -43,6 +44,23 @@ cvx_begin quiet
             end 
             sum_useful_term - gamma_min*(ICI(J_b(1),1) + INUI(J_b(1),1) + w) >= 0;
         end
+        
+        % === SIC constraint ===
+        if(SIC_constraint)
+            for bs = 1:N_BSs
+                for j = 1:(J_b(bs)-1-isJT)
+                    for k = j+1:(J_b(bs)-isJT)
+                        if((isJT && k==J_b(bs)) || (~isJT && k==J_b(bs) && bs==1))
+                            gamma_min = 2^(R_min_JT_user/(w*BW)) - 1;
+                        else
+                            gamma_min = 2^(R(k,bs)/(w*BW)) - 1;
+                        end
+                        P_i(two_dim_2_one_dim(k, bs, N_users, isJT))*gamma(j,bs,bs) - gamma_min*(ICI(j,bs) + INUI_jk(j,bs,k) + w) >= 0;
+                    end
+                end
+            end
+        end
+            
          % === BS max power constraint ===
         for bs = 1:N_BSs
             tot_power = 0;
@@ -59,7 +77,7 @@ cvx_end
 % cvx_optval
 
 % Sometimes a small negative value (arround -1e-14) is possible due to the
-% solver's tolerance (maeke it zero!)
+% solver's tolerance (make it zero!)
 P_i(P_i < 0) = 0;
 
 status = cvx_status;

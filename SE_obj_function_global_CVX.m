@@ -1,6 +1,7 @@
-function [f, N, D] = EE_obj_function_global_CVX(w, BW, gamma, rho, P_fix, kappa, lambda, PCM, isJT, a_ib, c_ib, c1_b, INUI, ICI, q)
+function N = SE_obj_function_global_CVX(w, BW, gamma, isJT, a_ib, c_ib, c1_b, INUI, ICI, q)
     [N_users, N_BSs, ~] = size(gamma);
     N_inner_users = N_users - 1;    
+
 
 %     N = system_throughput(w, BW, gamma, isJT, P_i);
 
@@ -43,10 +44,6 @@ function [f, N, D] = EE_obj_function_global_CVX(w, BW, gamma, rho, P_fix, kappa,
         end
         N = N + a_ib(N_users,1)*w*BW*sum_aux + c_ib(N_users,1)*w*BW - a_ib(N_users,1)*w*BW*log(ICI(N_users,1) + INUI(N_users,1) + w)./log(2);
     end
-    
-    % Calculates denominator
-    D = system_power_consumption(P_i, gamma, rho, P_fix, kappa, isJT, true);
-    
-    f = N - lambda*D;
+
 
 end
